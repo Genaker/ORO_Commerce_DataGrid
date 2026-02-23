@@ -72,7 +72,7 @@ Each library is exposed through a set of demo routes. These routes are set to `P
 | **DataTables** | `/grid/datatable` | `/grid/datatable/data` | `/json`, `/html`, `/ajax`, `/ajax-pagination` | **~86 KB** | **~30 KB** | **-88% lighter** |
 | **Tabulator** | `/grid/tabulator` | `/grid/tabulator/data` | `/json`, `/html`, `/ajax`, `/ajax-pagination` | **~383 KB** | **~87 KB** | **-65% lighter** |
 | **Oro DataGrid** | *Standard* | *Standard* | *Standard* | **~1.2 MB** | **~250 KB** | *Baseline* |
-| **AG Grid** | `/grid/ag-grid` | `/grid/ag-grid/data` | `/json`, `/html`, `/ajax`, `/ajax-pagination` | **~1.7 MB** | **~358 KB** | **+43% heavier** |
+| **AG Grid** (v33) | `/grid/ag-grid` | `/grid/ag-grid/data` | `/json`, `/html`, `/ajax`, `/ajax-pagination` | **~1.7 MB** | **~380 KB** | **+52% heavier** |
 
 *Note: Sizes are estimated based on Gzip compression, which is standard for modern web servers. The Oro DataGrid baseline is an estimate of the combined gzipped payload of its many individual JS components (as seen in the screenshot).*
 
