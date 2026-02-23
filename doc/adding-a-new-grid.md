@@ -72,4 +72,4 @@ Update ProductGridLayoutDataProvider to recognize your new route prefix and retu
 
 ## 6. Add Templates
 
-Copy the _embed templates from GridJs (or your chosen library) and adjust field names and labels for your entity.
+Copy the view templates from GridJs (or your chosen library) and adjust field names and labels for your entity.

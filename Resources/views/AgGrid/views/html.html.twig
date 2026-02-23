@@ -2,6 +2,7 @@
 {% set fields = gridBlock.getFields() %}
 {% set fieldNames = gridBlock.getFieldsNames() %}
 <link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/ag-grid.min.css') }}">
+<link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/ag-theme-alpine.min.css') }}">
 <div class="container-fluid">
     <h1>Product Grid - HTML (AG Grid)</h1>
     {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
@@ -151,6 +152,6 @@
     gridDiv.style.width = '100%';
     container.appendChild(gridDiv);
     
-    new agGrid.Grid(gridDiv, gridOptions);
+    agGrid.createGrid(gridDiv, gridOptions);
 })();
 </script>

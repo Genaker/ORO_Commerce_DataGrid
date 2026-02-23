@@ -3,38 +3,28 @@
 {% set fields = gridBlock.getFields() %}
 {% set fieldNames = gridBlock.getFieldsNames() %}
 <div class="container-fluid">
-    <h1>Product Grid (AG Grid)</h1>
+    <h1>Product Grid - AJAX Pagination (AG Grid)</h1>
     {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
-    <div id="product-grid" class="ag-grid" style="height: 400px;"></div>
+    <div id="product-grid" class="ag-theme-alpine ag-grid" style="height: 400px;"></div>
 </div>
 <link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/ag-grid.min.css') }}">
-<link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/preloader.css') }}">
+<link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/ag-theme-alpine.min.css') }}">
 <script src="{{ asset('bundles/genakerdatagrid/js/ag-grid.min.js') }}"></script>
 <script>
 (function() {
-    var container = document.getElementById('product-grid');
-    container.innerHTML = '<div class="grid-preloader"><div class="grid-spinner"></div></div>';
     var columnDefs = [{% for n in fieldNames %}
         { 
             field: '{{ n|e('js') }}', 
             headerName: '{{ (fields[n] ?? n)|e('js') }}'
-            {% if n == 'image' %}
-            , cellRenderer: (params) => params.value ? `<img src="${params.value}" style="max-width: 100px; max-height: 80px;" />` : ''
-            , sortable: false
-            , filter: false
-            {% endif %}
+            {% if n == 'image' %}, cellRenderer: (params) => params.value ? `<img src="${params.value}" style="max-width: 100px; max-height: 80px;" />` : '' {% endif %}
         }{% if not loop.last %}, {% endif %}
     {% endfor %}];
     var rowData = {{ gridData.data|json_encode|raw }};
-    new agGrid.Grid(document.getElementById('product-grid'), {
+    agGrid.createGrid(document.getElementById('product-grid'), {
         columnDefs: columnDefs,
         rowData: rowData,
         pagination: true,
-        paginationPageSize: 20,
-        defaultColDef: {
-            sortable: true,
-            filter: true
-        }
+        paginationPageSize: 20
     });
 })();
 </script>

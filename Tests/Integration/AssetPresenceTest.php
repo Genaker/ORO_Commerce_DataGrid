@@ -32,6 +32,7 @@ class AssetPresenceTest extends DataGridIntegrationTestCase
             ['css/datatables.min.css'],
             ['css/tabulator.min.css'],
             ['css/ag-grid.min.css'],
+            ['css/ag-theme-alpine.min.css'],
         ];
     }
 }

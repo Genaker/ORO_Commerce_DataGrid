@@ -32,5 +32,5 @@ The bundle uses a layered architecture:
 
 - layouts/default/genaker_product_grid/layout.yml
 - layouts/default/genaker_product_grid/layout.html.twig
-- GridJs, DataTable, Tabulator, AgGrid each have _embed templates: index, json, html, ajax, ajax_pagination
+- GridJs, DataTable, Tabulator, AgGrid each have a views/ folder with templates: index, json, html, ajax, ajax_pagination
 - GridJs/_filters.html.twig is shared
