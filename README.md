@@ -133,7 +133,7 @@ The bundle includes a comprehensive test suite covering unit logic, API endpoint
 
 ### Run All Tests
 ```bash
-warden shell -c "php bin/phpunit -c phpunit-datagrid.xml.dist src/Genaker/Bundle/DataGridBundle/Tests/"
+warden shell -c "php bin/phpunit -c src/Genaker/Bundle/DataGridBundle/phpunit.xml.dist src/Genaker/Bundle/DataGridBundle/Tests/"
 ```
 
 ### Key Test Suites

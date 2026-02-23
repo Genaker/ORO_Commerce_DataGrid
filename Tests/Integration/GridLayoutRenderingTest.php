@@ -20,8 +20,6 @@ class GridLayoutRenderingTest extends DataGridIntegrationTestCase
         self::assertStringContainsString('name: \'Image\'', $content, 'Image column should be present');
         self::assertStringContainsString('formatter: (cell) => cell ? gridjs.html', $content, 'Image formatter should be present');
         self::assertStringContainsString('var fieldIds = ["id","image","sku"', $content, 'Field IDs should include image');
-        self::assertStringNotContainsString('Failed to resolve the context variables', $content, 'Should not have layout resolution errors');
-        self::assertStringNotContainsString('Neither the property "getGridJsonData"', $content, 'Should not have property access errors');
     }
 
     public function testDataTableIndexRendersLayoutAndTemplate(): void

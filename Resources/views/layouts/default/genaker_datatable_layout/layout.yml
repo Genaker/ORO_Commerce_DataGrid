@@ -1,7 +1,4 @@
 layout:
-    imports:
-        - id: oro_customer_page
-
     actions:
         - '@setBlockTheme':
             themes: '@GenakerDataGrid/layouts/default/genaker_data_grid/layout.html.twig'

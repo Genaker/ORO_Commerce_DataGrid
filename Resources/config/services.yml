@@ -10,6 +10,13 @@ services:
         tags:
             - { name: layout.data_provider, alias: genaker_data_grid }
 
+    genaker_data_grid.layout.context_configurator:
+        class: Genaker\Bundle\DataGridBundle\Layout\DataGridContextConfigurator
+        arguments:
+            - '@request_stack'
+        tags:
+            - { name: layout.context_configurator }
+
     genaker_data_grid.provider.sample_product:
         public: true
         class: Genaker\Bundle\DataGridBundle\Provider\SampleProductDataProvider
