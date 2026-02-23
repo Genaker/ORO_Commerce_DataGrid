@@ -1,0 +1,96 @@
+{% set gridData = gridBlock.getGridJsonData() %}
+{% set fields = gridBlock.getFields() %}
+{% set fieldNames = gridBlock.getFieldsNames() %}
+<link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/tabulator.min.css') }}">
+<div class="container-fluid">
+    <h1>Product Grid - HTML (Tabulator)</h1>
+    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    <div id="product-grid-target"></div>
+    <div id="product-grid-wrapper" class="tabulator" role="grid" tabulator-layout="fitColumns">
+        <div class="tabulator-header" style="padding-right: 0px;">
+            <div class="tabulator-header-contents" role="rowgroup">
+                <div class="tabulator-headers" role="row" style="height: 40px;">
+                    {% for n in fieldNames %}
+                        <div class="tabulator-col {% if n != 'image' %}tabulator-sortable{% endif %}" role="columnheader" style="min-width: 40px; width: 150px;">
+                            <div class="tabulator-col-content">
+                                <div class="tabulator-col-title-holder">
+                                    <div class="tabulator-col-title">{{ fields[n] ?? n }}</div>
+                                    {% if n != 'image' %}<div class="tabulator-col-sorter"><div class="tabulator-arrow"></div></div>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="tabulator-tableholder" style="height: auto;">
+            <div class="tabulator-table" role="rowgroup">
+                <table id="product-grid" style="width: 100%; display: none;">
+                    <thead>
+                        <tr>
+                            {% for n in fieldNames %}
+                                <th tabulator-field="{{ n }}" {% if n == 'image' %}tabulator-formatter="image" tabulator-formatterParams-height="80px" tabulator-headerSort="false"{% endif %}>
+                                    {{ fields[n] ?? n }}
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                </table>
+                {% for row in gridData.data %}
+                    <div class="tabulator-row {% if loop.index is odd %}tabulator-row-odd{% else %}tabulator-row-even{% endif %}" role="row">
+                        {% for n in fieldNames %}
+                            <div class="tabulator-cell" role="gridcell" style="width: 150px;">
+                                {% if n == 'image' and row[n] %}
+                                    <img src="{{ row[n] }}" style="max-width: 100px; max-height: 80px;" />
+                                {% else %}
+                                    {{ row[n] ?? '' }}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="tabulator-footer">
+            <div class="tabulator-footer-contents">
+                <span class="tabulator-paginator">
+                    <button class="tabulator-page" type="button" role="button" disabled="">First</button>
+                    <button class="tabulator-page" type="button" role="button" disabled="">Prev</button>
+                    <span class="tabulator-pages"><button class="tabulator-page active" type="button">1</button></span>
+                    <button class="tabulator-page" type="button" role="button">Next</button>
+                    <button class="tabulator-page" type="button" role="button">Last</button>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{ asset('bundles/genakerdatagrid/js/tabulator.min.js') }}"></script>
+<script>
+(function() {
+    var table = document.getElementById('product-grid');
+    var wrapper = document.getElementById('product-grid-wrapper');
+    var target = document.getElementById('product-grid-target');
+    
+    new Tabulator(target, {
+        data: {{ gridData.data|json_encode|raw }},
+        columns: [
+            {% for n in fieldNames %}
+            {
+                title: "{{ fields[n] ?? n }}",
+                field: "{{ n }}",
+                {% if n == 'image' %}
+                formatter: "image",
+                formatterParams: { height: "80px" },
+                headerSort: false
+                {% endif %}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        pagination: "local",
+        paginationSize: 20,
+        layout: "fitColumns",
+        placeholder: "No Data Available"
+    });
+    wrapper.style.display = 'none';
+})();
+</script>

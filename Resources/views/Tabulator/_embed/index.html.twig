@@ -1,0 +1,33 @@
+{% set gridData = gridBlock.getGridJsonData() %}
+{% set dataUrl = gridBlock.getDataUrl() %}
+{% set fields = gridBlock.getFields() %}
+{% set fieldNames = gridBlock.getFieldsNames() %}
+<div class="container-fluid">
+    <h1>Product Grid (Tabulator)</h1>
+    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    <div id="product-grid"></div>
+</div>
+<link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/tabulator.min.css') }}">
+<link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/preloader.css') }}">
+<script src="{{ asset('bundles/genakerdatagrid/js/tabulator.min.js') }}"></script>
+<script>
+(function() {
+    var container = document.getElementById('product-grid');
+    container.innerHTML = '<div class="grid-preloader"><div class="grid-spinner"></div></div>';
+    var columns = [{% for n in fieldNames %}
+        { 
+            title: '{{ (fields[n] ?? n)|e('js') }}', 
+            field: '{{ n|e('js') }}' 
+            {% if n == 'image' %}, formatter: "image", formatterParams: { height: "80px" }, headerSort: false {% endif %}
+        }{% if not loop.last %}, {% endif %}
+    {% endfor %}];
+    var data = {{ gridData.data|json_encode|raw }};
+    new Tabulator('#product-grid', { 
+        data: data, 
+        columns: columns, 
+        pagination: true, 
+        paginationSize: 20,
+        layout: "fitColumns"
+    });
+})();
+</script>

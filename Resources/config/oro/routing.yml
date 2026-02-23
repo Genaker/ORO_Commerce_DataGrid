@@ -1,0 +1,6 @@
+genaker_data_grid:
+    resource: "@GenakerDataGridBundle/Controller/"
+    type: attribute
+    prefix: /grid
+    options:
+        frontend: true

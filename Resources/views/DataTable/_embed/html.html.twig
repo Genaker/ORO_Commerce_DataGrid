@@ -1,0 +1,56 @@
+{% set gridData = gridBlock.getGridJsonData() %}
+{% set fields = gridBlock.getFields() %}
+{% set fieldNames = gridBlock.getFieldsNames() %}
+<link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/datatables.min.css') }}">
+<div class="container-fluid">
+    <h1>Product Grid - HTML (DataTables)</h1>
+    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    <div id="product-grid-container">
+        <div class="dataTables_wrapper no-footer">
+            <div class="dataTables_length"><label>Show <select name="product-grid_length" class=""><option value="10">10</option><option value="20" selected>20</option><option value="50">50</option><option value="100">100</option></select> entries</label></div>
+            <table id="product-grid" class="display dataTable no-footer" style="width: 100%;" role="grid">
+                <thead>
+                    <tr role="row">
+                        {% for n in fieldNames %}
+                            <th class="{% if n != 'image' %}sorting{% endif %}" style="width: 150px;">{{ fields[n] ?? n }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in gridData.data %}
+                <tr role="row" class="{% if loop.index is odd %}odd{% else %}even{% endif %}">
+                    {% for n in fieldNames %}
+                    <td>
+                        {% if n == 'image' and row[n] %}
+                            <img src="{{ row[n] }}" style="max-width: 100px; max-height: 80px;" />
+                        {% else %}
+                            {{ row[n] ?? '' }}
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="dataTables_info" role="status" aria-live="polite">Showing 1 to 20 of {{ gridData.total }} entries</div>
+            <div class="dataTables_paginate paging_simple_numbers">
+                <a class="paginate_button previous disabled" aria-controls="product-grid" data-dt-idx="0" tabindex="-1">Previous</a>
+                <span><a class="paginate_button current" aria-controls="product-grid" data-dt-idx="1" tabindex="0">1</a></span>
+                <a class="paginate_button next" aria-controls="product-grid" data-dt-idx="2" tabindex="0">Next</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{ asset('bundles/genakerdatagrid/js/jquery.min.js') }}"></script>
+<script src="{{ asset('bundles/genakerdatagrid/js/datatables.min.js') }}"></script>
+<script>
+$(function() { 
+    var container = document.getElementById('product-grid-container');
+    var table = $('#product-grid').DataTable({ 
+        pageLength: 20,
+        columnDefs: [
+            { orderable: false, targets: {{ fieldNames|keys|filter(k => fieldNames[k] == 'image')|first|default(-1) }} }
+        ]
+    }); 
+});
+</script>

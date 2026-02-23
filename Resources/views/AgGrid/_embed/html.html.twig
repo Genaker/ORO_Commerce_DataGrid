@@ -1,0 +1,156 @@
+{% set gridData = gridBlock.getGridJsonData() %}
+{% set fields = gridBlock.getFields() %}
+{% set fieldNames = gridBlock.getFieldsNames() %}
+<link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/ag-grid.min.css') }}">
+<div class="container-fluid">
+    <h1>Product Grid - HTML (AG Grid)</h1>
+    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    
+    <div id="product-grid-container" class="ag-theme-alpine" style="height: 600px; width: 100%;">
+        <div class="ag-root-wrapper ag-layout-normal ag-ltr" role="presentation" style="height: 100%;">
+            <div class="ag-root-wrapper-body ag-layout-normal ag-focus-managed" role="presentation" style="height: 100%;">
+                <div class="ag-root ag-unselectable ag-layout-normal" role="treegrid" aria-colcount="{{ fieldNames|length }}" aria-rowcount="{{ gridData.data|length + 1 }}" style="height: 100%;">
+                    <!-- Header -->
+                    <div class="ag-header ag-focus-managed ag-pivot-off ag-header-allow-overflow" role="presentation" style="height: 48px; min-height: 48px;">
+                        <div class="ag-header-viewport" role="presentation">
+                            <div class="ag-header-container" role="rowgroup" style="width: {{ fieldNames|length * 200 }}px; height: 48px;">
+                                <div class="ag-header-row ag-header-row-column" role="row" aria-rowindex="1" style="height: 48px; width: {{ fieldNames|length * 200 }}px;">
+                                    {% for n in fieldNames %}
+                                        <div class="ag-header-cell {% if n != 'image' %}ag-header-cell-sortable{% endif %} ag-focus-managed" role="columnheader" aria-colindex="{{ loop.index }}" style="width: 200px; left: {{ (loop.index0) * 200 }}px; position: absolute;">
+                                            <div class="ag-header-cell-comp-wrapper" role="presentation">
+                                                <div class="ag-cell-label-container" role="presentation">
+                                                    <div class="ag-header-cell-label" role="presentation" style="padding: 0 12px;">
+                                                        <span class="ag-header-cell-text">{{ fields[n] ?? n }}</span>
+                                                        {% if n != 'image' %}
+                                                            <span class="ag-sort-indicator-container">
+                                                                <span class="ag-sort-indicator-icon ag-sort-none-icon"><span class="ag-icon ag-icon-none"></span></span>
+                                                            </span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Body -->
+                    <div class="ag-body-viewport ag-layout-normal ag-row-no-animation" role="presentation" style="height: 500px; overflow: auto;">
+                        <div class="ag-center-cols-clipper" role="presentation" style="height: {{ gridData.data|length * 42 }}px;">
+                            <div class="ag-center-cols-container" role="rowgroup" style="width: {{ fieldNames|length * 200 }}px; height: {{ gridData.data|length * 42 }}px;">
+                                {% for row in gridData.data %}
+                                    <div class="ag-row {% if loop.index is odd %}ag-row-odd{% else %}ag-row-even{% endif %} ag-row-level-0 ag-row-position-absolute" role="row" aria-rowindex="{{ loop.index + 1 }}" style="height: 42px; width: 100%; transform: translateY({{ (loop.index0) * 42 }}px); position: absolute;">
+                                        {% for n in fieldNames %}
+                                            <div class="ag-cell ag-cell-not-inline-editing ag-cell-normal-height" role="gridcell" aria-colindex="{{ loop.index }}" style="width: 200px; left: {{ (loop.index0) * 200 }}px; line-height: 42px; padding: 0 12px; position: absolute;">
+                                                {% if n == 'image' and row[n] %}
+                                                    <img src="{{ row[n] }}" style="max-width: 100px; max-height: 40px; vertical-align: middle;" />
+                                                {% else %}
+                                                    {{ row[n] ?? '' }}
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="ag-paging-panel ag-unselectable" style="height: 48px; display: flex; align-items: center; border-top: 1px solid #dde2eb;">
+                <span class="ag-paging-row-summary-panel" role="status" style="padding: 0 12px;">
+                    <span>1</span> to <span>20</span> of <span>{{ gridData.total }}</span>
+                </span>
+                <span class="ag-paging-page-summary-panel" style="margin-left: auto; padding: 0 12px;">
+                    <div class="ag-paging-button ag-disabled" role="button" style="display: inline-block; padding: 0 8px;">First</div>
+                    <div class="ag-paging-button ag-disabled" role="button" style="display: inline-block; padding: 0 8px;">Previous</div>
+                    <span class="ag-paging-description" role="status">
+                        <span>Page</span>
+                        <span class="ag-paging-number">1</span>
+                        <span>of</span>
+                        <span class="ag-paging-number">1</span>
+                    </span>
+                    <div class="ag-paging-button ag-disabled" role="button" style="display: inline-block; padding: 0 8px;">Next</div>
+                    <div class="ag-paging-button ag-disabled" role="button" style="display: inline-block; padding: 0 8px;">Last</div>
+                </span>
+            </div>
+        </div>
+
+        <!-- Hidden source table for AG Grid to parse -->
+        <table id="source-table" style="display: none;">
+            <thead>
+                <tr>
+                    {% for n in fieldNames %}
+                        <th>{{ fields[n] ?? n }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in gridData.data %}
+                    <tr>
+                        {% for n in fieldNames %}
+                            <td>{{ row[n] ?? '' }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script src="{{ asset('bundles/genakerdatagrid/js/ag-grid.min.js') }}"></script>
+<script>
+(function() {
+    var container = document.getElementById('product-grid-container');
+    var table = document.getElementById('source-table');
+    
+    var columnDefs = [];
+    var rowData = [];
+    
+    var headers = table.querySelectorAll('thead th');
+    var fieldIds = {{ fieldNames|json_encode|raw }};
+    
+    headers.forEach((th, index) => {
+        var field = fieldIds[index];
+        columnDefs.push({
+            headerName: th.innerText,
+            field: field,
+            sortable: field !== 'image',
+            filter: field !== 'image',
+            cellRenderer: field === 'image' ? (params) => params.value ? `<img src="${params.value}" style="max-width: 100px; max-height: 80px;" />` : '' : null
+        });
+    });
+    
+    var rows = table.querySelectorAll('tbody tr');
+    rows.forEach(tr => {
+        var row = {};
+        tr.querySelectorAll('td').forEach((td, index) => {
+            row[fieldIds[index]] = td.innerText.trim();
+        });
+        rowData.push(row);
+    });
+
+    var gridOptions = {
+        columnDefs: columnDefs,
+        rowData: rowData,
+        pagination: true,
+        paginationPageSize: 20,
+        defaultColDef: {
+            sortable: true,
+            filter: true
+        }
+    };
+
+    // Replace the static HTML with the interactive grid
+    container.innerHTML = '';
+    var gridDiv = document.createElement('div');
+    gridDiv.className = 'ag-theme-alpine';
+    gridDiv.style.height = '600px';
+    gridDiv.style.width = '100%';
+    container.appendChild(gridDiv);
+    
+    new agGrid.Grid(gridDiv, gridOptions);
+})();
+</script>

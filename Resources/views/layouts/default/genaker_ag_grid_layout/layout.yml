@@ -1,0 +1,17 @@
+layout:
+    imports:
+        - id: oro_customer_page
+
+    actions:
+        - '@setBlockTheme':
+            themes: '@GenakerDataGrid/layouts/default/genaker_data_grid/layout.html.twig'
+
+        - '@add':
+            id: data_grid_content
+            parentId: page_content
+            blockType: block
+            options:
+                vars:
+                    gridType: 'AgGrid'
+                    gridBlock: '=data["genaker_data_grid"].getAgGridBlock()'
+                    view: '=context["view"]'

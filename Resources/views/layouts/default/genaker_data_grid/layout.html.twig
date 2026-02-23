@@ -1,0 +1,3 @@
+{% block _data_grid_content_widget %}
+    {% include '@GenakerDataGrid/' ~ block.vars.gridType ~ '/_embed/' ~ block.vars.view ~ '.html.twig' with {gridBlock: block.vars.gridBlock} %}
+{% endblock %}

@@ -1,0 +1,79 @@
+services:
+    genaker_data_grid.layout.data_provider.data_grid:
+        public: true
+        class: Genaker\Bundle\DataGridBundle\Layout\DataProvider\DataGridLayoutDataProvider
+        arguments:
+            $gridJsBlock: '@genaker_data_grid.block.sample_gridjs'
+            $dataTableBlock: '@genaker_data_grid.block.sample_datatable'
+            $tabulatorBlock: '@genaker_data_grid.block.sample_tabulator'
+            $agGridBlock: '@genaker_data_grid.block.sample_ag_grid'
+        tags:
+            - { name: layout.data_provider, alias: genaker_data_grid }
+
+    genaker_data_grid.provider.sample_product:
+        public: true
+        class: Genaker\Bundle\DataGridBundle\Provider\SampleProductDataProvider
+        arguments:
+            - '@doctrine'
+            - '@oro_attachment.manager'
+            - '@oro_product.helper.product_image_helper'
+
+    genaker_data_grid.block.sample_gridjs:
+        class: Genaker\Bundle\DataGridBundle\Block\DataGridBlock
+        arguments:
+            - '@genaker_data_grid.provider.sample_product'
+            - '@request_stack'
+            - '@router'
+            - genaker_data_grid_gridjs_data
+
+    genaker_data_grid.block.sample_datatable:
+        class: Genaker\Bundle\DataGridBundle\Block\DataGridBlock
+        arguments:
+            - '@genaker_data_grid.provider.sample_product'
+            - '@request_stack'
+            - '@router'
+            - genaker_data_grid_datatable_data
+
+    genaker_data_grid.block.sample_tabulator:
+        class: Genaker\Bundle\DataGridBundle\Block\DataGridBlock
+        arguments:
+            - '@genaker_data_grid.provider.sample_product'
+            - '@request_stack'
+            - '@router'
+            - genaker_data_grid_tabulator_data
+
+    genaker_data_grid.block.sample_ag_grid:
+        class: Genaker\Bundle\DataGridBundle\Block\DataGridBlock
+        arguments:
+            - '@genaker_data_grid.provider.sample_product'
+            - '@request_stack'
+            - '@router'
+            - genaker_data_grid_ag_grid_data
+
+    Genaker\Bundle\DataGridBundle\Controller\GridJsController:
+        public: true
+        arguments:
+            $block: '@genaker_data_grid.block.sample_gridjs'
+        calls:
+            - [setContainer, ['@service_container']]
+
+    Genaker\Bundle\DataGridBundle\Controller\DataTableController:
+        public: true
+        arguments:
+            $block: '@genaker_data_grid.block.sample_datatable'
+        calls:
+            - [setContainer, ['@service_container']]
+
+    Genaker\Bundle\DataGridBundle\Controller\TabulatorController:
+        public: true
+        arguments:
+            $block: '@genaker_data_grid.block.sample_tabulator'
+        calls:
+            - [setContainer, ['@service_container']]
+
+    Genaker\Bundle\DataGridBundle\Controller\AgGridController:
+        public: true
+        arguments:
+            $block: '@genaker_data_grid.block.sample_ag_grid'
+        calls:
+            - [setContainer, ['@service_container']]

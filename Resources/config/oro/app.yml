@@ -1,0 +1,4 @@
+oro_security:
+    access_control:
+        # Product grid demo routes - public, no login (routes at /grid/*)
+        - { path: ^/grid, roles: PUBLIC_ACCESS, priority: 100 }

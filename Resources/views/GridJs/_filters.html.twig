@@ -1,0 +1,11 @@
+<form method="get" class="form-inline mb-3 p-3 bg-light border rounded">
+    {% for name, label in gridBlock.getFields() %}
+        {% if name != 'image' %}
+            <input type="text" name="filter[{{ name }}]" value="{{ gridBlock.getFilterValues()[name] ?? '' }}" placeholder="{{ label }}" class="form-control form-control-sm mr-2 mb-2" style="width: auto;">
+        {% endif %}
+    {% endfor %}
+    <div class="mb-2">
+        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+        <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}" class="btn btn-secondary btn-sm ml-1">Clear</a>
+    </div>
+</form>

@@ -1,0 +1,76 @@
+{% set gridData = gridBlock.getGridJsonData() %}
+{% set fields = gridBlock.getFields() %}
+{% set fieldNames = gridBlock.getFieldsNames() %}
+<link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/gridjs-mermaid.min.css') }}">
+<div class="container-fluid">
+    <h1>Product Grid - HTML Table (Grid.js)</h1>
+    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    <div id="product-grid-target"></div>
+    <div id="product-grid-container" class="gridjs gridjs-container" style="width: 100%;">
+        <div class="gridjs-wrapper" style="height: auto;">
+            <table id="source-table" class="gridjs-table" style="height: auto; width: 100%;">
+                <thead class="gridjs-thead">
+                    <tr class="gridjs-tr">
+                        {% for n in fieldNames %}
+                            <th class="gridjs-th {% if n != 'image' %}gridjs-th-sort{% endif %}" style="width: 150px;">
+                                <div class="gridjs-th-content">{{ fields[n] ?? n }}</div>
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody class="gridjs-tbody">
+                    {% for row in gridData.data %}
+                        <tr class="gridjs-tr">
+                            {% for n in fieldNames %}
+                                <td class="gridjs-td">
+                                    {% if n == 'image' and row[n] %}
+                                        <img src="{{ row[n] }}" style="max-width: 100px; max-height: 80px;" />
+                                    {% else %}
+                                        {{ row[n] ?? '' }}
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="gridjs-footer">
+            <div class="gridjs-pagination">
+                <div class="gridjs-summary" title="Page 1 of 1">Showing <b>1</b> to <b>20</b> of <b>{{ gridData.total }}</b> results</div>
+                <div class="gridjs-pages">
+                    <button tabindex="0" role="button" disabled="" title="Previous" aria-label="Previous" class="">Previous</button>
+                    <button tabindex="0" role="button" class="gridjs-currentPage" title="Page 1" aria-label="Page 1">1</button>
+                    <button tabindex="0" role="button" title="Next" aria-label="Next" class="">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{ asset('bundles/genakerdatagrid/js/gridjs.min.js') }}"></script>
+<script>
+(function() {
+    var container = document.getElementById('product-grid-container');
+    var table = document.getElementById('source-table');
+    
+    var grid = new gridjs.Grid({
+        from: table,
+        sort: true,
+        pagination: { limit: 20 },
+        columns: [{% for n in fieldNames %}
+            {
+                name: '{{ (fields[n] ?? n)|e('js') }}',
+                {% if n == 'image' %}
+                formatter: (cell) => cell ? gridjs.html(`<img src="${cell}" style="max-width: 100px; max-height: 80px;" />`) : '',
+                sort: false
+                {% endif %}
+            }{% if not loop.last %}, {% endif %}
+        {% endfor %}]
+    });
+    
+    // Clear initial HTML and render grid
+    var target = document.getElementById('product-grid-target');
+    grid.render(target);
+    container.style.display = 'none';
+})();
+</script>
