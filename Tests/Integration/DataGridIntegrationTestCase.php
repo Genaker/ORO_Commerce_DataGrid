@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Integration test base using real app kernel (dev env).
  * Uses HttpKernel::handle() instead of test.client - no framework.test required.
+ * Base URL is configurable via TEST_BASE_URL env var to avoid leaking real implementation domain.
  */
 abstract class DataGridIntegrationTestCase extends KernelTestCase
 {
@@ -35,13 +36,36 @@ abstract class DataGridIntegrationTestCase extends KernelTestCase
         return static::$kernel->getContainer();
     }
 
-    protected function request(string $method, string $uri, array $server = []): Response
+    protected function getBaseUrl(): string
+    {
+        $baseUrl = getenv('TEST_BASE_URL') ?: 'http://localhost';
+        $baseUrl = rtrim($baseUrl, '/');
+        if ($baseUrl === '') {
+            throw new \RuntimeException('TEST_BASE_URL must be set and non-empty');
+        }
+        return $baseUrl;
+    }
+
+    protected function url(string $path): string
+    {
+        $path = '/' . ltrim($path, '/');
+        return $this->getBaseUrl() . $path;
+    }
+
+    protected function request(string $method, string $uri, array $server = [], int $redirectLimit = 5): Response
     {
         if (str_starts_with($uri, '/') && !str_starts_with($uri, '//')) {
-            $uri = 'http://localhost' . $uri;
+            $uri = $this->getBaseUrl() . $uri;
         }
         $request = Request::create($uri, $method, [], [], [], $server);
-        return static::$kernel->handle($request);
+        $response = static::$kernel->handle($request);
+
+        if ($redirectLimit > 0 && $response->isRedirection() && $response->headers->has('Location')) {
+            $location = $response->headers->get('Location');
+            return $this->request('GET', $location, $server, $redirectLimit - 1);
+        }
+
+        return $response;
     }
 
     protected function requestWithAuth(string $method, string $uri): Response

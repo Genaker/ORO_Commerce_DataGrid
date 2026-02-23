@@ -7,9 +7,16 @@ namespace Genaker\Bundle\DataGridBundle\Tests\Integration;
  */
 class GridLayoutRenderingTest extends DataGridIntegrationTestCase
 {
+    public function testBaseUrlIsConfigured(): void
+    {
+        $baseUrl = $this->getBaseUrl();
+        self::assertNotEmpty($baseUrl, 'TEST_BASE_URL must be set');
+        self::assertStringStartsWith('http', $baseUrl, 'TEST_BASE_URL should be a valid URL');
+    }
+
     public function testGridJsIndexRendersLayoutAndTemplate(): void
     {
-        $response = $this->request('GET', 'https://app.peigenesis.test/grid/gridjs');
+        $response = $this->request('GET', $this->url('/grid/gridjs'));
 
         self::assertSame(200, $response->getStatusCode(), $response->getContent() ?: '');
         $content = $response->getContent();
@@ -24,7 +31,7 @@ class GridLayoutRenderingTest extends DataGridIntegrationTestCase
 
     public function testDataTableIndexRendersLayoutAndTemplate(): void
     {
-        $response = $this->request('GET', 'https://app.peigenesis.test/grid/datatable');
+        $response = $this->request('GET', $this->url('/grid/datatable'));
 
         self::assertSame(200, $response->getStatusCode(), $response->getContent() ?: '');
         $content = $response->getContent();
@@ -34,7 +41,7 @@ class GridLayoutRenderingTest extends DataGridIntegrationTestCase
 
     public function testTabulatorIndexRendersLayoutAndTemplate(): void
     {
-        $response = $this->request('GET', 'https://app.peigenesis.test/grid/tabulator');
+        $response = $this->request('GET', $this->url('/grid/tabulator'));
 
         self::assertSame(200, $response->getStatusCode(), $response->getContent() ?: '');
         $content = $response->getContent();
@@ -44,7 +51,7 @@ class GridLayoutRenderingTest extends DataGridIntegrationTestCase
 
     public function testAgGridIndexRendersLayoutAndTemplate(): void
     {
-        $response = $this->request('GET', 'https://app.peigenesis.test/grid/ag-grid');
+        $response = $this->request('GET', $this->url('/grid/ag-grid'));
 
         self::assertSame(200, $response->getStatusCode(), $response->getContent() ?: '');
         $content = $response->getContent();

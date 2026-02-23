@@ -134,6 +134,11 @@ The bundle includes a comprehensive test suite covering unit logic, API endpoint
 warden shell -c "php bin/phpunit -c src/Genaker/Bundle/DataGridBundle/phpunit.xml.dist src/Genaker/Bundle/DataGridBundle/Tests/"
 ```
 
+Integration tests use `TEST_BASE_URL` (default `http://localhost`) to avoid hardcoding the real implementation domain. Override via env when needed:
+```bash
+TEST_BASE_URL=https://app.example.test php bin/phpunit -c src/Genaker/Bundle/DataGridBundle/phpunit.xml.dist
+```
+
 ### Key Test Suites
 - **AssetPresenceTest** — Verifies that JS/CSS files are correctly installed and readable.
 - **GridLayoutRenderingTest** — Ensures Twig templates and Oro Layouts render with correct data.

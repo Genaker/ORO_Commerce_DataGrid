@@ -6,7 +6,7 @@ class TabulatorEndpointTest extends DataGridIntegrationTestCase
 {
     public function testDataEndpointReturnsJsonStructure(): void
     {
-        $response = $this->request('GET', 'https://app.peigenesis.test/grid/tabulator/data');
+        $response = $this->request('GET', $this->url('/grid/tabulator/data'));
 
         self::assertSame(200, $response->getStatusCode(), $response->getContent() ?: '');
         $data = json_decode($response->getContent(), true);
@@ -22,7 +22,7 @@ class TabulatorEndpointTest extends DataGridIntegrationTestCase
      */
     public function testTabulatorDataEndpointIsPublic(): void
     {
-        $response = $this->request('GET', 'https://app.peigenesis.test/grid/tabulator/data');
+        $response = $this->request('GET', $this->url('/grid/tabulator/data'));
 
         self::assertSame(200, $response->getStatusCode(), 'Endpoint should be public; got redirect to login?');
         self::assertNotSame(302, $response->getStatusCode());

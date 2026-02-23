@@ -6,7 +6,7 @@ class DataTableEndpointTest extends DataGridIntegrationTestCase
 {
     public function testDataEndpointReturnsJsonStructure(): void
     {
-        $response = $this->request('GET', 'https://app.peigenesis.test/grid/datatable/data');
+        $response = $this->request('GET', $this->url('/grid/datatable/data'));
 
         self::assertSame(200, $response->getStatusCode(), $response->getContent() ?: '');
         $data = json_decode($response->getContent(), true);
@@ -22,7 +22,7 @@ class DataTableEndpointTest extends DataGridIntegrationTestCase
      */
     public function testDataTableDataEndpointIsPublic(): void
     {
-        $response = $this->request('GET', 'https://app.peigenesis.test/grid/datatable/data');
+        $response = $this->request('GET', $this->url('/grid/datatable/data'));
 
         self::assertSame(200, $response->getStatusCode(), 'Endpoint should be public; got redirect to login?');
         self::assertNotSame(302, $response->getStatusCode());
