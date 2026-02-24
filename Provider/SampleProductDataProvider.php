@@ -3,9 +3,7 @@
 namespace Genaker\Bundle\DataGridBundle\Provider;
 
 use Doctrine\Persistence\ManagerRegistry;
-use Genaker\Bundle\DataGridBundle\Api\GridDataProviderInterface;
 use Genaker\Bundle\DataGridBundle\Builder\GridBuilder;
-use Genaker\Bundle\DataGridBundle\Builder\GridConfig;
 use Genaker\Bundle\DataGridBundle\Model\DataProcessor\DateProcessor;
 use Genaker\Bundle\DataGridBundle\Model\DataProcessor\ImageProcessor;
 use Genaker\Bundle\DataGridBundle\Model\DataProcessor\StatusProcessor;
@@ -14,13 +12,10 @@ use Oro\Bundle\ProductBundle\Entity\Product;
 use Oro\Bundle\ProductBundle\Helper\ProductImageHelper;
 
 /**
- * Sample Product grid data provider. Uses GridBuilder for reusability.
- * Example of how to configure a grid for any Doctrine entity.
+ * Sample Product grid data provider. Extends GenericGridDataProvider with Product-specific config.
  */
-class SampleProductDataProvider implements GridDataProviderInterface
+class SampleProductDataProvider extends GenericGridDataProvider
 {
-    private readonly GenericGridDataProvider $inner;
-
     public function __construct(
         ManagerRegistry $doctrine,
         AttachmentManager $attachmentManager,
@@ -37,23 +32,13 @@ class SampleProductDataProvider implements GridDataProviderInterface
                 'type' => 'Type',
                 'createdAt' => 'Created',
             ])
+            ->addJoin('e.images', 'pi')
+            ->addJoin('pi.image', 'img')
             ->addProcessor('createdAt', new DateProcessor())
             ->addProcessor('status', new StatusProcessor())
             ->addProcessor('image', new ImageProcessor($attachmentManager, $productImageHelper))
             ->setDefaultSort('sku', 'asc')
             ->build();
-        $this->inner = new GenericGridDataProvider($doctrine, $config);
-    }
-
-    #[\Override]
-    public function getJsonGridData(
-        array $fields,
-        array $filters,
-        int $page,
-        int $pageSize,
-        ?string $sortField,
-        ?string $sortOrder
-    ): array {
-        return $this->inner->getJsonGridData($fields, $filters, $page, $pageSize, $sortField, $sortOrder);
+        parent::__construct($doctrine, $config);
     }
 }

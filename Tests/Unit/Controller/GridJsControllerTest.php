@@ -6,19 +6,21 @@ use Genaker\Bundle\DataGridBundle\Block\GenericGridBlock;
 use Genaker\Bundle\DataGridBundle\Controller\GridJsController;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 
 class GridJsControllerTest extends TestCase
 {
     public function testDataActionReturnsJsonResponse(): void
     {
         $block = $this->createMock(GenericGridBlock::class);
-        $block->method('getGridJsonData')->willReturn(['data' => [], 'total' => 0]);
+        $block->method('getGridJsonData')->willReturn(['data' => [], 'total' => 0, 'page' => 1, 'pageSize' => 10]);
 
         $controller = new GridJsController($block);
         $response = $controller->data();
 
         self::assertInstanceOf(JsonResponse::class, $response);
-        self::assertSame('{"data":[],"total":0}', $response->getContent());
+        $content = json_decode($response->getContent(), true);
+        self::assertArrayHasKey('data', $content);
+        self::assertArrayHasKey('total', $content);
+        self::assertArrayHasKey('paginationHtml', $content);
     }
 }

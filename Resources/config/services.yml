@@ -25,6 +25,12 @@ services:
             - '@oro_attachment.manager'
             - '@oro_product.helper.product_image_helper'
 
+    genaker_data_grid.provider.sample_product_sql:
+        public: true
+        class: Genaker\Bundle\DataGridBundle\Provider\SampleProductSqlDataProvider
+        arguments:
+            - '@doctrine.dbal.default_connection'
+
     genaker_data_grid.block.sample_gridjs:
         class: Genaker\Bundle\DataGridBundle\Block\DataGridBlock
         arguments:

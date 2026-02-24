@@ -1,3 +1,18 @@
 {% block _data_grid_content_widget %}
     {% include '@GenakerDataGrid/' ~ block.vars.gridType ~ '/views/' ~ block.vars.view ~ '.html.twig' with {gridBlock: block.vars.gridBlock} %}
 {% endblock %}
+
+{% block _grid_pagination_widget %}
+    {% set showPagination = block.vars.view in ['html', 'ajax_pagination'] %}
+    {% if showPagination %}
+        <link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/grid-pagination.css') }}">
+        {% set gridData = block.vars.gridBlock.getGridJsonData() %}
+        {% include '@GenakerDataGrid/_grid_pagination.html.twig' with {
+            total: gridData.total,
+            page: gridData.page|default(app.request.query.get('p', 1)),
+            pageSize: gridData.pageSize|default(app.request.query.get('pageSize', 10))
+        } %}
+    {% else %}
+        <div id="grid-pagination" class="grid-pagination-container"></div>
+    {% endif %}
+{% endblock %}

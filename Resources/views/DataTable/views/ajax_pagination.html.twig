@@ -1,38 +1,100 @@
-{% set gridData = gridBlock.getGridJsonData() %}
 {% set dataUrl = gridBlock.getDataUrl() %}
 {% set fields = gridBlock.getFields() %}
 {% set fieldNames = gridBlock.getFieldsNames() %}
+{% set initialPageSize = app.request.query.get('pageSize', 10)|default(10) %}
+{% if initialPageSize not in [10, 25, 50, 100] %}{% set initialPageSize = 10 %}{% endif %}
 <div class="container-fluid">
     <h1>Product Grid - AJAX Pagination (DataTables)</h1>
-    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    {% include '@GenakerDataGrid/_filters.html.twig' with {gridBlock: gridBlock} %}
+    {% include '@GenakerDataGrid/_page_size_selector.html.twig' %}
     <div id="product-grid-preloader" class="grid-preloader"><div class="grid-spinner"></div></div>
     <table id="product-grid" class="display" style="display: none;">
         <thead><tr>{% for n in fieldNames %}<th>{{ fields[n] ?? n }}</th>{% endfor %}</tr></thead>
-        <tbody>
-        {% for row in gridData.data %}
-        <tr>{% for n in fieldNames %}
-            <td>
-                {% if n == 'image' and row[n] %}
-                    <img src="{{ row[n] }}" style="max-width: 100px; max-height: 80px;" />
-                {% else %}
-                    {{ row[n] ?? '' }}
-                {% endif %}
-            </td>
-        {% endfor %}</tr>
-        {% endfor %}
-        </tbody>
+        <tbody></tbody>
     </table>
 </div>
 <link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/datatables.min.css') }}">
 <link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/preloader.css') }}">
+<script src="{{ asset('bundles/genakerdatagrid/js/grid-url-sync.js') }}"></script>
+<script src="{{ asset('bundles/genakerdatagrid/js/grid-pagination.js') }}"></script>
 <script src="{{ asset('bundles/genakerdatagrid/js/jquery.min.js') }}"></script>
 <script src="{{ asset('bundles/genakerdatagrid/js/datatables.min.js') }}"></script>
 <script>
-$(function() { $('#product-grid').DataTable({ 
-    pageLength: 20,
-    initComplete: function() {
-        $('#product-grid-preloader').hide();
-        $('#product-grid').show();
+$(function() {
+    var params = GridUrlSync.getParams();
+    var currentPage = parseInt(params.get('p') || params.get('page') || '1', 10);
+    var currentPageSize = parseInt(params.get('pageSize') || params.get('size') || '10', 10);
+    var pageSizeOptions = [10, 25, 50, 100];
+    if (pageSizeOptions.indexOf(currentPageSize) < 0) currentPageSize = 10;
+
+    var pageSizeSelect = document.getElementById('grid-page-size-select');
+    if (pageSizeSelect && pageSizeSelect.value !== String(currentPageSize)) pageSizeSelect.value = currentPageSize;
+
+    var dataUrl = '{{ dataUrl|e('js') }}';
+    var fieldNames = {{ fieldNames|json_encode|raw }};
+    var sortField = '{{ app.request.query.get("sortField")|default("")|e("js") }}';
+    var sortOrder = '{{ app.request.query.get("sortOrder")|default("asc")|e("js") }}';
+    var sortColIndex = sortField ? fieldNames.indexOf(sortField) : -1;
+    var initialOrder = sortColIndex >= 0 ? [[sortColIndex, sortOrder]] : [];
+    var columns = fieldNames.map(function(f) {
+        return { data: f, orderable: f !== 'image' };
+    });
+
+    function goToPage(n) {
+        currentPage = n;
+        GridUrlSync.syncUrl({ p: currentPage, pageSize: currentPageSize });
+        table.ajax.reload();
     }
-}); });
+
+    var table = $('#product-grid').DataTable({
+        serverSide: true,
+        paging: false,
+        searching: false,
+        info: false,
+        lengthChange: false,
+        order: initialOrder,
+        columns: columns,
+        ajax: {
+            url: dataUrl,
+            type: 'GET',
+            data: function(d) {
+                d.p = currentPage;
+                d.pageSize = currentPageSize;
+                if (d.order && d.order.length) {
+                    d.sortField = fieldNames[d.order[0].column];
+                    d.sortOrder = d.order[0].dir;
+                } else if (sortField) {
+                    d.sortField = sortField;
+                    d.sortOrder = sortOrder;
+                }
+            },
+            dataSrc: function(json) {
+                GridPagination.render('grid-pagination', json.total, currentPage, currentPageSize, goToPage, { paginationHtml: json.paginationHtml });
+                json.recordsTotal = json.total;
+                json.recordsFiltered = json.total;
+                return json.data;
+            }
+        },
+        drawCallback: function() {
+            var order = table.order();
+            GridUrlSync.syncUrl({
+                p: currentPage,
+                pageSize: currentPageSize,
+                sortField: order.length && order[0].length >= 2 ? fieldNames[order[0][0]] : undefined,
+                sortOrder: order.length && order[0].length >= 2 ? order[0][1] : undefined
+            });
+        },
+        initComplete: function() {
+            $('#product-grid-preloader').hide();
+            $('#product-grid').show();
+        }
+    });
+
+    document.getElementById('grid-page-size-select').addEventListener('change', function() {
+        currentPageSize = parseInt(this.value, 10);
+        currentPage = 1;
+        GridUrlSync.syncUrl({ p: currentPage, pageSize: currentPageSize });
+        table.ajax.reload();
+    });
+});
 </script>

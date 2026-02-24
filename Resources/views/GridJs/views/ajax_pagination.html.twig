@@ -1,36 +1,103 @@
-{% set gridData = gridBlock.getGridJsonData() %}
 {% set dataUrl = gridBlock.getDataUrl() %}
 {% set fields = gridBlock.getFields() %}
 {% set fieldNames = gridBlock.getFieldsNames() %}
+{% set initialPageSize = app.request.query.get('pageSize', 10)|default(10) %}
+{% if initialPageSize not in [10, 25, 50, 100] %}{% set initialPageSize = 10 %}{% endif %}
 <div class="container-fluid">
     <h1>Product Grid - AJAX Pagination (Grid.js)</h1>
-    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    {% include '@GenakerDataGrid/_filters.html.twig' with {gridBlock: gridBlock} %}
+    {% include '@GenakerDataGrid/_page_size_selector.html.twig' %}
     <div id="product-grid-container"></div>
 </div>
 <link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/gridjs-mermaid.min.css') }}">
-<link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/preloader.css') }}">
+<script src="{{ asset('bundles/genakerdatagrid/js/grid-url-sync.js') }}"></script>
+<script src="{{ asset('bundles/genakerdatagrid/js/grid-pagination.js') }}"></script>
 <script src="{{ asset('bundles/genakerdatagrid/js/gridjs.min.js') }}"></script>
 <script>
 (function() {
+    var params = GridUrlSync.getParams();
+    var currentPage = parseInt(params.get('p') || params.get('page') || '1', 10);
+    var currentPageSize = parseInt(params.get('pageSize') || params.get('size') || '10', 10);
+    var pageSizeOptions = [10, 25, 50, 100];
+    if (pageSizeOptions.indexOf(currentPageSize) < 0) currentPageSize = 10;
+
     var container = document.getElementById('product-grid-container');
-    container.innerHTML = '<div class="grid-preloader"><div class="grid-spinner"></div></div>';
+    var pageSizeSelect = document.getElementById('grid-page-size-select');
+    if (pageSizeSelect && pageSizeSelect.value !== String(currentPageSize)) pageSizeSelect.value = currentPageSize;
+
+    var dataUrl = '{{ dataUrl|e('js') }}';
+    var fieldIds = {{ fieldNames|json_encode|raw }};
     var columns = [{% for n in fieldNames %}
         {
             name: '{{ (fields[n] ?? n)|e('js') }}',
             {% if n == 'image' %}
-            formatter: (cell) => cell ? gridjs.html(`<img src="${cell}" style="max-width: 100px; max-height: 80px;" />`) : ''
+            formatter: (cell) => gridjs.html(`<img src="${cell || '{{ asset('bundles/genakerdatagrid/images/placeholder.svg')|e('js') }}'}" style="max-width: 100px; max-height: 80px;" alt="${cell ? 'Product' : 'No image'}" />`),
+            sort: false
             {% endif %}
         }{% if not loop.last %}, {% endif %}
     {% endfor %}];
-    var initialData = {{ gridData.data|json_encode|raw }};
+
+    function mapRows(data) {
+        return data.map(function(row) {
+            return fieldIds.map(function(f) { return row[f] != null ? row[f] : ''; });
+        });
+    }
+
+    function goToPage(n) {
+        currentPage = n;
+        GridUrlSync.syncUrl({ p: currentPage, pageSize: currentPageSize });
+        grid.forceRender();
+    }
+
     var grid = new gridjs.Grid({
         columns: columns,
-        data: initialData.map(function(row) {
-            return [{% for n in fieldNames %}row['{{ n|e('js') }}'] != null ? row['{{ n|e('js') }}'] : ''{% if not loop.last %}, {% endif %}{% endfor %}];
-        }),
-        pagination: { limit: 20, server: { url: '{{ dataUrl|e('js') }}' } }
+        sort: {
+            server: {
+                url: function(prev, cols) {
+                    if (!cols.length) return prev;
+                    var col = cols[0];
+                    var dir = col.direction === 1 ? 'asc' : 'desc';
+                    var sep = prev.indexOf('?') >= 0 ? '&' : '?';
+                    return prev + sep + 'sortField=' + encodeURIComponent(fieldIds[col.index]) + '&sortOrder=' + dir;
+                }
+            }
+        },
+        server: {
+            url: dataUrl,
+            data: function(opts) {
+                var base = opts.url || dataUrl;
+                var sep = base.indexOf('?') >= 0 ? '&' : '?';
+                var fetchUrl = base + sep + 'p=' + currentPage + '&pageSize=' + currentPageSize;
+
+                var sortQs = new URLSearchParams((base.split('?')[1] || ''));
+                GridUrlSync.syncUrl({
+                    p: currentPage,
+                    pageSize: currentPageSize,
+                    sortField: sortQs.get('sortField') || undefined,
+                    sortOrder: sortQs.get('sortOrder') || undefined
+                });
+
+                return fetch(fetchUrl).then(function(r) {
+                    if (!r.ok) throw new Error('Fetch failed');
+                    return r.json();
+                }).then(function(d) {
+                    GridPagination.render('grid-pagination', d.total, currentPage, currentPageSize, goToPage, { paginationHtml: d.paginationHtml });
+                    return { data: mapRows(d.data) };
+                }).catch(function() {
+                    container.innerHTML = '<div class="alert alert-danger">Failed to load data.</div>';
+                    return { data: [] };
+                });
+            }
+        }
     });
-    container.innerHTML = '';
+
     grid.render(container);
+
+    document.getElementById('grid-page-size-select').addEventListener('change', function() {
+        currentPageSize = parseInt(this.value, 10);
+        currentPage = 1;
+        GridUrlSync.syncUrl({ p: currentPage, pageSize: currentPageSize });
+        grid.forceRender();
+    });
 })();
 </script>

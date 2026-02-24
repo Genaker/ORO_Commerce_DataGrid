@@ -1,0 +1,33 @@
+{#
+  Pagination body - summary, prev/next, page numbers.
+  Variables: total, page, pageSize
+#}
+{% set totalPages = max((total / pageSize)|round(0, 'ceil'), 1) %}
+{% set from = (page - 1) * pageSize + 1 %}
+{% set to = min(page * pageSize, total) %}
+{% set start = max(page - 1, 2) %}
+{% set end = min(page + 1, totalPages - 1) %}
+{% if totalPages <= 7 %}
+    {% set pages = [] %}
+    {% for i in 1..totalPages %}{% set pages = pages|merge([i]) %}{% endfor %}
+{% else %}
+    {% set pages = [1] %}
+    {% if page > 3 %}{% set pages = pages|merge(['...']) %}{% endif %}
+    {% if start <= end %}{% set pages = pages|merge(range(start, end)) %}{% endif %}
+    {% if page < totalPages - 2 %}{% set pages = pages|merge(['...']) %}{% endif %}
+    {% set pages = pages|merge([totalPages]) %}
+{% endif %}
+<div class="grid-pagination">
+    <div class="grid-pagination-summary">Showing {{ from }} to {{ to }} of {{ total }} results</div>
+    <div class="grid-pagination-pages">
+        <button type="button" class="grid-pagination-btn" data-page="{{ page - 1 }}" {{ page <= 1 ? 'disabled' : '' }}>Previous</button>
+        {% for p in pages %}
+            {% if p == '...' %}
+                <button type="button" class="grid-pagination-spread" disabled>...</button>
+            {% else %}
+                <button type="button" class="grid-pagination-btn{{ p == page ? ' grid-pagination-current' : '' }}" data-page="{{ p }}" {{ p == page ? 'disabled' : '' }}>{{ p }}</button>
+            {% endif %}
+        {% endfor %}
+        <button type="button" class="grid-pagination-btn" data-page="{{ page + 1 }}" {{ page >= totalPages ? 'disabled' : '' }}>Next</button>
+    </div>
+</div>

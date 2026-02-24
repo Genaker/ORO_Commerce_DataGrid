@@ -1,0 +1,9 @@
+/* Neutral pagination styles - shared across Grid.js, DataTable, Tabulator, AG Grid */
+.grid-pagination { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; padding: 0.75rem 0; }
+.grid-pagination-summary { margin-right: 1rem; }
+.grid-pagination-pages { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; }
+.grid-pagination-pages button { padding: 0.25rem 0.5rem; margin: 0; border: 1px solid #d2d6dc; border-radius: 4px; background: #fff; cursor: pointer; font-size: 14px; }
+.grid-pagination-pages button:hover:not(:disabled) { background: #f3f4f6; border-color: #9ca3af; }
+.grid-pagination-pages button.grid-pagination-current { background: #3b82f6; border-color: #3b82f6; color: #fff; cursor: default; }
+.grid-pagination-pages button.grid-pagination-spread { border: none; background: transparent; cursor: default; }
+.grid-pagination-pages button:disabled { opacity: 0.6; cursor: not-allowed; }

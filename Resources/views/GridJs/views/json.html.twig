@@ -3,7 +3,7 @@
 {% set fieldNames = gridBlock.getFieldsNames() %}
 <div class="container-fluid">
     <h1>Product Grid - Initial JSON (Grid.js)</h1>
-    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    {% include '@GenakerDataGrid/_filters.html.twig' with {gridBlock: gridBlock} %}
     <div id="product-grid-container"></div>
     <script type="application/json" id="grid-initial-data">{{ gridData|json_encode|raw }}</script>
 </div>
@@ -19,14 +19,14 @@
         {
             name: '{{ (fields[n] ?? n)|e('js') }}',
             {% if n == 'image' %}
-            formatter: (cell) => cell ? gridjs.html(`<img src="${cell}" style="max-width: 100px; max-height: 80px;" />`) : ''
+            formatter: (cell) => gridjs.html(`<img src="${cell || '{{ asset('bundles/genakerdatagrid/images/placeholder.svg')|e('js') }}'}" style="max-width: 100px; max-height: 80px;" alt="${cell ? 'Product' : 'No image'}" />`)
             {% endif %}
         }{% if not loop.last %}, {% endif %}
     {% endfor %}];
     var data = cfg.data.map(function(row) {
         return [{% for n in fieldNames %}row['{{ n|e('js') }}'] != null ? row['{{ n|e('js') }}'] : ''{% if not loop.last %}, {% endif %}{% endfor %}];
     });
-    var grid = new gridjs.Grid({ columns: columns, data: data, pagination: { limit: 20 } });
+    var grid = new gridjs.Grid({ columns: columns, data: data, pagination: { limit: 10 } });
     container.innerHTML = '';
     grid.render(container);
 })();

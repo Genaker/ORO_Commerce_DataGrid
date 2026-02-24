@@ -1,5 +1,27 @@
 # API Reference
 
+## Data Endpoint (JSON API)
+
+The grid data endpoints (e.g. `/grid/gridjs/data`, `/grid/ag-grid/data`) accept these query parameters:
+
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `p` | int | 1 | Page number (1-based). Alias: `page` |
+| `pageSize` | int | 10 | Rows per page. Alias: `size` (Tabulator) |
+| `sortField` | string | — | Field name to sort by |
+| `sortOrder` | string | — | `asc` or `desc` |
+| `filter[field]` | string | — | Filter value for a field (e.g. `filter[sku]=ABC`) |
+
+**Response format:**
+```json
+{
+  "data": [ { "id": 1, "sku": "ABC", ... } ],
+  "total": 42
+}
+```
+
+---
+
 ## GridDataProviderInterface
 
 ```php
@@ -28,6 +50,7 @@ interface GridDataProviderInterface
 | `getFields()` | `array<string, string>` | Field name => label |
 | `getFieldsNames()` | `list<string>` | Ordered field names |
 | `getGridJsonData()` | `array{data, total, timeSql?}` | Grid data for current request |
+| `getGridJsonDataWithLimit(int $limit)` | `array{data, total, timeSql?}` | Load up to `$limit` rows for client-side processing (html-all / infinity mode) |
 | `getFilterValues()` | `array<string, mixed>` | Current filter values from query |
 | `getDataUrl()` | `string` | Data endpoint URL with filter query params |
 

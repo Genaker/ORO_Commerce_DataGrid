@@ -12,12 +12,13 @@ class DataTableControllerTest extends TestCase
     public function testDataActionReturnsJsonResponse(): void
     {
         $block = $this->createMock(GenericGridBlock::class);
-        $block->method('getGridJsonData')->willReturn(['data' => [], 'total' => 0]);
+        $block->method('getGridJsonData')->willReturn(['data' => [], 'total' => 0, 'page' => 1, 'pageSize' => 10]);
 
         $controller = new DataTableController($block);
         $response = $controller->data();
 
         self::assertInstanceOf(JsonResponse::class, $response);
-        self::assertSame('{"data":[],"total":0}', $response->getContent());
+        $content = json_decode($response->getContent(), true);
+        self::assertArrayHasKey('paginationHtml', $content);
     }
 }

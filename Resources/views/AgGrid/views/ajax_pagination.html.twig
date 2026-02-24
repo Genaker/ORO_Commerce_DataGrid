@@ -1,30 +1,104 @@
-{% set gridData = gridBlock.getGridJsonData() %}
 {% set dataUrl = gridBlock.getDataUrl() %}
 {% set fields = gridBlock.getFields() %}
 {% set fieldNames = gridBlock.getFieldsNames() %}
+{% set initialPageSize = app.request.query.get('pageSize', 10)|default(10) %}
+{% if initialPageSize not in [10, 25, 50, 100] %}{% set initialPageSize = 10 %}{% endif %}
 <div class="container-fluid">
     <h1>Product Grid - AJAX Pagination (AG Grid)</h1>
-    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    {% include '@GenakerDataGrid/_filters.html.twig' with {gridBlock: gridBlock} %}
     <div id="product-grid" class="ag-theme-alpine ag-grid" style="height: 400px;"></div>
 </div>
 <link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/ag-grid.min.css') }}">
 <link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/ag-theme-alpine.min.css') }}">
+<script src="{{ asset('bundles/genakerdatagrid/js/grid-url-sync.js') }}"></script>
 <script src="{{ asset('bundles/genakerdatagrid/js/ag-grid.min.js') }}"></script>
 <script>
 (function() {
+    var params = GridUrlSync.getParams();
+    var initialPage = parseInt(params.get('p') || params.get('page') || '1', 10);
+    var initialPageSize = parseInt(params.get('pageSize') || params.get('size') || '10', 10);
+    var initialSortField = params.get('sortField') || null;
+    var initialSortOrder = (params.get('sortOrder') || 'asc').toLowerCase();
+    if (initialSortOrder !== 'asc' && initialSortOrder !== 'desc') initialSortOrder = 'asc';
+    var pageSizeOptions = [10, 25, 50, 100];
+    if (pageSizeOptions.indexOf(initialPageSize) < 0) initialPageSize = 10;
+
+    var dataUrl = '{{ dataUrl|e('js') }}';
     var columnDefs = [{% for n in fieldNames %}
-        { 
-            field: '{{ n|e('js') }}', 
-            headerName: '{{ (fields[n] ?? n)|e('js') }}'
-            {% if n == 'image' %}, cellRenderer: (params) => params.value ? `<img src="${params.value}" style="max-width: 100px; max-height: 80px;" />` : '' {% endif %}
+        {
+            field: '{{ n|e('js') }}',
+            headerName: '{{ (fields[n] ?? n)|e('js') }}',
+            sortable: {{ n == 'image' ? 'false' : 'true' }},
+            filter: {{ n == 'image' ? 'false' : 'true' }}
+            {% if n == 'image' %}, cellRenderer: (params) => { var img = document.createElement('img'); img.src = params.value || '{{ asset('bundles/genakerdatagrid/images/placeholder.svg')|e('js') }}'; img.style.maxWidth = '100px'; img.style.maxHeight = '80px'; img.alt = params.value ? 'Product' : 'No image'; return img; } {% endif %}
         }{% if not loop.last %}, {% endif %}
     {% endfor %}];
-    var rowData = {{ gridData.data|json_encode|raw }};
-    agGrid.createGrid(document.getElementById('product-grid'), {
+
+    var gridApi;
+    var paginationChanging = false;
+    var firstRequest = true;
+    var datasource = {
+        getRows: function(params) {
+            var startRow = params.startRow ?? params.request?.startRow ?? 0;
+            var endRow = params.endRow ?? params.request?.endRow ?? initialPageSize;
+            var pageSize = Math.max(1, endRow - startRow);
+            var page;
+            if (firstRequest) {
+                firstRequest = false;
+                page = initialPage;
+            } else {
+                page = Math.floor(startRow / pageSize) + 1;
+            }
+            var opts = { p: page, pageSize: pageSize };
+            var sortModel = params.sortModel || params.request?.sortModel || [];
+            if (sortModel.length) {
+                opts.sortField = sortModel[0].colId || sortModel[0].field || '';
+                opts.sortOrder = sortModel[0].sort === 'asc' ? 'asc' : 'desc';
+            } else if (initialSortField) {
+                opts.sortField = initialSortField;
+                opts.sortOrder = initialSortOrder;
+            }
+            var url = GridUrlSync.buildFetchUrl(dataUrl, opts);
+            fetch(url).then(function(r) { return r.json(); }).then(function(res) {
+                var rows = res.data || [];
+                var total = typeof res.total === 'number' ? res.total : parseInt(res.total, 10) || 0;
+                params.successCallback(rows, total);
+            }).catch(function() { params.failCallback(); });
+        }
+    };
+
+    var gridOptions = {
+        theme: 'legacy',
         columnDefs: columnDefs,
-        rowData: rowData,
+        rowModelType: 'infinite',
+        datasource: datasource,
+        cacheBlockSize: initialPageSize,
+        maxBlocksInCache: 1,
+        rowHeight: 90,
         pagination: true,
-        paginationPageSize: 20
-    });
+        paginationPageSize: initialPageSize,
+        paginationPageSizeSelector: pageSizeOptions,
+        defaultColDef: { sortable: true, filter: true },
+        initialSort: initialSortField ? [{ colId: initialSortField, sort: initialSortOrder }] : undefined,
+        onGridReady: function(e) { gridApi = e.api; },
+        onFirstDataRendered: function() {
+            if (gridApi && initialPage > 1) {
+                gridApi.paginationGoToPage(initialPage - 1);
+            }
+        },
+        onPaginationChanged: function(e) {
+            if ((e.newPage || e.newPageSize) && gridApi && !paginationChanging) {
+                paginationChanging = true;
+                var page = gridApi.paginationGetCurrentPage() + 1;
+                var pageSize = gridApi.paginationGetPageSize();
+                GridUrlSync.syncUrl({ p: page, pageSize: pageSize });
+                gridApi.purgeInfiniteCache();
+                gridApi.paginationGoToPage(page - 1);
+                setTimeout(function() { paginationChanging = false; }, 0);
+            }
+        }
+    };
+
+    agGrid.createGrid(document.getElementById('product-grid'), gridOptions);
 })();
 </script>

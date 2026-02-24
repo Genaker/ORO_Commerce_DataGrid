@@ -3,7 +3,7 @@
 {% set fieldNames = gridBlock.getFieldsNames() %}
 <div class="container-fluid">
     <h1>Product Grid - AJAX (Tabulator)</h1>
-    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    {% include '@GenakerDataGrid/_filters.html.twig' with {gridBlock: gridBlock} %}
     <div id="product-grid"></div>
 </div>
 <link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/tabulator.min.css') }}">
@@ -17,7 +17,7 @@
         { 
             title: '{{ (fields[n] ?? n)|e('js') }}', 
             field: '{{ n|e('js') }}' 
-            {% if n == 'image' %}, formatter: "image", formatterParams: { height: "80px" } {% endif %}
+            {% if n == 'image' %}, formatter: function(cell) { var url = cell.getValue(); return '<img src="' + (url || '{{ asset('bundles/genakerdatagrid/images/placeholder.svg')|e('js') }}') + '" style="max-width: 100px; max-height: 80px;" alt="' + (url ? 'Product' : 'No image') + '" />'; } {% endif %}
         }{% if not loop.last %}, {% endif %}
     {% endfor %}];
     new Tabulator('#product-grid', {
@@ -25,7 +25,7 @@
         ajaxResponse: function(url, params, response) { return response.data; },
         columns: columns,
         pagination: true,
-        paginationSize: 20
+        paginationSize: 10
     });
 })();
 </script>

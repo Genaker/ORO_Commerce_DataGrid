@@ -1,96 +1,85 @@
 {% set gridData = gridBlock.getGridJsonData() %}
 {% set fields = gridBlock.getFields() %}
 {% set fieldNames = gridBlock.getFieldsNames() %}
+{% set initialPageSize = app.request.query.get('pageSize', 10)|default(10) %}
+{% if initialPageSize not in [10, 25, 50, 100] %}{% set initialPageSize = 10 %}{% endif %}
+{% set urlPage = app.request.query.get('p', 1)|default(1) %}
+{% set colWidthPct = (100 / fieldNames|length)|round(2) %}
 <link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/tabulator.min.css') }}">
+<style>
+#product-grid .tabulator-initial-table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+#product-grid .tabulator-initial-table th,
+#product-grid .tabulator-initial-table td { padding: 4px; border: 1px solid #aaa; overflow: hidden; text-overflow: ellipsis; width: {{ colWidthPct }}%; }
+#product-grid .tabulator-initial-table th { background: #e6e6e6; font-weight: 700; cursor: pointer; }
+#product-grid .tabulator-initial-table tr:nth-child(even) { background: #efefef; }
+</style>
 <div class="container-fluid">
     <h1>Product Grid - HTML (Tabulator)</h1>
-    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
-    <div id="product-grid-target"></div>
-    <div id="product-grid-wrapper" class="tabulator" role="grid" tabulator-layout="fitColumns">
-        <div class="tabulator-header" style="padding-right: 0px;">
-            <div class="tabulator-header-contents" role="rowgroup">
-                <div class="tabulator-headers" role="row" style="height: 40px;">
+    {% include '@GenakerDataGrid/_filters.html.twig' with {gridBlock: gridBlock} %}
+    {% include '@GenakerDataGrid/_page_size_selector.html.twig' %}
+    <div id="product-grid">
+        <table class="tabulator-initial-table" style="width: 100%;">
+            <thead>
+                <tr>
                     {% for n in fieldNames %}
-                        <div class="tabulator-col {% if n != 'image' %}tabulator-sortable{% endif %}" role="columnheader" style="min-width: 40px; width: 150px;">
-                            <div class="tabulator-col-content">
-                                <div class="tabulator-col-title-holder">
-                                    <div class="tabulator-col-title">{{ fields[n] ?? n }}</div>
-                                    {% if n != 'image' %}<div class="tabulator-col-sorter"><div class="tabulator-arrow"></div></div>{% endif %}
-                                </div>
-                            </div>
-                        </div>
+                    <th>{{ fields[n] ?? n }}</th>
                     {% endfor %}
-                </div>
-            </div>
-        </div>
-        <div class="tabulator-tableholder" style="height: auto;">
-            <div class="tabulator-table" role="rowgroup">
-                <table id="product-grid" style="width: 100%; display: none;">
-                    <thead>
-                        <tr>
-                            {% for n in fieldNames %}
-                                <th tabulator-field="{{ n }}" {% if n == 'image' %}tabulator-formatter="image" tabulator-formatterParams-height="80px" tabulator-headerSort="false"{% endif %}>
-                                    {{ fields[n] ?? n }}
-                                </th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                </table>
+                </tr>
+            </thead>
+            <tbody>
                 {% for row in gridData.data %}
-                    <div class="tabulator-row {% if loop.index is odd %}tabulator-row-odd{% else %}tabulator-row-even{% endif %}" role="row">
-                        {% for n in fieldNames %}
-                            <div class="tabulator-cell" role="gridcell" style="width: 150px;">
-                                {% if n == 'image' and row[n] %}
-                                    <img src="{{ row[n] }}" style="max-width: 100px; max-height: 80px;" />
-                                {% else %}
-                                    {{ row[n] ?? '' }}
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
+                <tr>
+                    {% for n in fieldNames %}
+                    <td>{% if n == 'image' %}<img src="{{ row[n] ?: asset('bundles/genakerdatagrid/images/placeholder.svg') }}" style="max-width: 100px; max-height: 80px;" alt="{{ row[n] ? 'Product' : 'No image'}}" />{% else %}{{ row[n] ?? '' }}{% endif %}</td>
+                    {% endfor %}
+                </tr>
                 {% endfor %}
-            </div>
-        </div>
-        <div class="tabulator-footer">
-            <div class="tabulator-footer-contents">
-                <span class="tabulator-paginator">
-                    <button class="tabulator-page" type="button" role="button" disabled="">First</button>
-                    <button class="tabulator-page" type="button" role="button" disabled="">Prev</button>
-                    <span class="tabulator-pages"><button class="tabulator-page active" type="button">1</button></span>
-                    <button class="tabulator-page" type="button" role="button">Next</button>
-                    <button class="tabulator-page" type="button" role="button">Last</button>
-                </span>
-            </div>
-        </div>
+            </tbody>
+        </table>
     </div>
 </div>
+<script src="{{ asset('bundles/genakerdatagrid/js/grid-url-sync.js') }}"></script>
+<script src="{{ asset('bundles/genakerdatagrid/js/grid-pagination.js') }}"></script>
 <script src="{{ asset('bundles/genakerdatagrid/js/tabulator.min.js') }}"></script>
 <script>
 (function() {
-    var table = document.getElementById('product-grid');
-    var wrapper = document.getElementById('product-grid-wrapper');
-    var target = document.getElementById('product-grid-target');
-    
-    new Tabulator(target, {
+    var currentPage = {{ urlPage }};
+    var currentPageSize = {{ initialPageSize }};
+    var total = {{ gridData.total }};
+
+    function goToPage(n) {
+        var params = new URLSearchParams(window.location.search);
+        params.set('p', n);
+        params.set('pageSize', currentPageSize);
+        window.location.search = params.toString();
+    }
+
+    var columns = [{% for n in fieldNames %}
+        {
+            title: "{{ fields[n] ?? n }}",
+            field: "{{ n }}",
+            widthGrow: 1,
+            headerSort: {{ n == 'image' ? 'false' : 'true' }}
+            {% if n == 'image' %}, formatter: function(cell) { var url = cell.getValue(); return '<img src="' + (url || '{{ asset('bundles/genakerdatagrid/images/placeholder.svg')|e('js') }}') + '" style="max-width: 100px; max-height: 80px;" alt="' + (url ? 'Product' : 'No image') + '" />'; } {% endif %}
+        }{% if not loop.last %},{% endif %}
+    {% endfor %}];
+
+    var table = new Tabulator('#product-grid', {
         data: {{ gridData.data|json_encode|raw }},
-        columns: [
-            {% for n in fieldNames %}
-            {
-                title: "{{ fields[n] ?? n }}",
-                field: "{{ n }}",
-                {% if n == 'image' %}
-                formatter: "image",
-                formatterParams: { height: "80px" },
-                headerSort: false
-                {% endif %}
-            }{% if not loop.last %},{% endif %}
-            {% endfor %}
-        ],
-        pagination: "local",
-        paginationSize: 20,
+        columns: columns,
         layout: "fitColumns",
+        layoutColumnsOnNewData: false,
+        pagination: false,
         placeholder: "No Data Available"
     });
-    wrapper.style.display = 'none';
+
+    GridPagination.render('grid-pagination', total, currentPage, currentPageSize, goToPage);
+
+    document.getElementById('grid-page-size-select').addEventListener('change', function() {
+        var params = new URLSearchParams(window.location.search);
+        params.set('pageSize', this.value);
+        params.set('p', 1);
+        window.location.search = params.toString();
+    });
 })();
 </script>

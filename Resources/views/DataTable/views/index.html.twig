@@ -2,9 +2,11 @@
 {% set dataUrl = gridBlock.getDataUrl() %}
 {% set fields = gridBlock.getFields() %}
 {% set fieldNames = gridBlock.getFieldsNames() %}
+{% set initialPageSize = app.request.query.get('pageSize', 10)|default(10) %}
+{% if initialPageSize not in [10, 25, 50, 100] %}{% set initialPageSize = 10 %}{% endif %}
 <div class="container-fluid">
     <h1>Product Grid (DataTables)</h1>
-    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    {% include '@GenakerDataGrid/_filters.html.twig' with {gridBlock: gridBlock} %}
     <div id="product-grid-preloader" class="grid-preloader"><div class="grid-spinner"></div></div>
     <table id="product-grid" class="display" style="display: none;">
         <thead><tr>{% for n in fieldNames %}<th>{{ fields[n] ?? n }}</th>{% endfor %}</tr></thead>
@@ -12,8 +14,8 @@
         {% for row in gridData.data %}
         <tr>{% for n in fieldNames %}
             <td>
-                {% if n == 'image' and row[n] %}
-                    <img src="{{ row[n] }}" style="max-width: 100px; max-height: 80px;" />
+                {% if n == 'image' %}
+                    <img src="{{ row[n] ?: asset('bundles/genakerdatagrid/images/placeholder.svg') }}" style="max-width: 100px; max-height: 80px;" alt="{{ row[n] ? 'Product' : 'No image'}}" />
                 {% else %}
                     {{ row[n] ?? '' }}
                 {% endif %}
@@ -30,7 +32,8 @@
 <script>
 $(function() {
     $('#product-grid').DataTable({ 
-        pageLength: 20,
+        pageLength: {{ initialPageSize }},
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
         columnDefs: [
             { orderable: false, targets: {{ fieldNames|keys|filter(k => fieldNames[k] == 'image')|first|default(-1) }} }
         ],

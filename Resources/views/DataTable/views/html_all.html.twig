@@ -1,20 +1,19 @@
-{% set gridData = gridBlock.getGridJsonData() %}
+{# Limit 1000 can be removed to load all records #}
+{% set gridData = gridBlock.getGridJsonDataWithLimit(1000) %}
 {% set fields = gridBlock.getFields() %}
 {% set fieldNames = gridBlock.getFieldsNames() %}
 {% set initialPageSize = app.request.query.get('pageSize', 10)|default(10) %}
 {% if initialPageSize not in [10, 25, 50, 100] %}{% set initialPageSize = 10 %}{% endif %}
-{% set urlPage = app.request.query.get('p', 1)|default(1) %}
 <link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/datatables.min.css') }}">
 <div class="container-fluid">
-    <h1>Product Grid - HTML (DataTables)</h1>
+    <h1>Product Grid - HTML (DataTables) - Client-side</h1>
     {% include '@GenakerDataGrid/_filters.html.twig' with {gridBlock: gridBlock} %}
-    {% include '@GenakerDataGrid/_page_size_selector.html.twig' %}
     <div id="product-grid-container">
-        <table id="product-grid" class="display" style="width: 100%;">
+        <table id="product-grid" class="display" style="width: 100%;" role="grid">
             <thead>
                 <tr>
                     {% for n in fieldNames %}
-                        <th>{{ fields[n] ?? n }}</th>
+                        <th style="width: 150px;">{{ fields[n] ?? n }}</th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -37,39 +36,14 @@
     </div>
 </div>
 <script src="{{ asset('bundles/genakerdatagrid/js/jquery.min.js') }}"></script>
-<script src="{{ asset('bundles/genakerdatagrid/js/grid-url-sync.js') }}"></script>
-<script src="{{ asset('bundles/genakerdatagrid/js/grid-pagination.js') }}"></script>
 <script src="{{ asset('bundles/genakerdatagrid/js/datatables.min.js') }}"></script>
 <script>
 $(function() {
-    var currentPage = {{ urlPage }};
-    var currentPageSize = {{ initialPageSize }};
-    var total = {{ gridData.total }};
-
-    function goToPage(n) {
-        var params = new URLSearchParams(window.location.search);
-        params.set('p', n);
-        params.set('pageSize', currentPageSize);
-        window.location.search = params.toString();
-    }
-
+    var imageColIndex = {{ fieldNames|keys|filter(k => fieldNames[k] == 'image')|first|default(-1) }};
     $('#product-grid').DataTable({
-        paging: false,
-        searching: false,
-        info: false,
-        ordering: true,
-        columnDefs: [
-            { orderable: false, targets: {{ fieldNames|keys|filter(k => fieldNames[k] == 'image')|first|default(-1) }} }
-        ]
-    });
-
-    GridPagination.render('grid-pagination', total, currentPage, currentPageSize, goToPage);
-
-    document.getElementById('grid-page-size-select').addEventListener('change', function() {
-        var params = new URLSearchParams(window.location.search);
-        params.set('pageSize', this.value);
-        params.set('p', 1);
-        window.location.search = params.toString();
+        pageLength: {{ initialPageSize }},
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        columnDefs: imageColIndex >= 0 ? [{ orderable: false, targets: imageColIndex }] : []
     });
 });
 </script>

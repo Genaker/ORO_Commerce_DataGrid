@@ -39,4 +39,16 @@ class GridDataEndpointTest extends DataGridIntegrationTestCase
         self::assertSame(200, $response->getStatusCode(), 'Endpoint should be public; got redirect to login? ' . $response->getContent());
         self::assertNotSame(302, $response->getStatusCode(), 'Should not redirect to login when unauthenticated');
     }
+
+    public function testGridJsDataEndpointSupportsSorting(): void
+    {
+        $response = $this->request('GET', $this->url('/grid/gridjs/data?sortField=sku&sortOrder=desc&pageSize=5'));
+
+        self::assertSame(200, $response->getStatusCode());
+        $data = json_decode($response->getContent(), true);
+        self::assertIsArray($data);
+        self::assertArrayHasKey('data', $data);
+        self::assertArrayHasKey('total', $data);
+        self::assertIsArray($data['data']);
+    }
 }

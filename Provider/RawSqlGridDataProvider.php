@@ -46,7 +46,7 @@ class RawSqlGridDataProvider implements GridDataProviderInterface
         $qb->setMaxResults($pageSize);
 
         $startSql = microtime(true);
-        $results = $qb->executeQuery()->fetchAllAssociative();
+        $results = $this->fetchAllAssociative($qb);
         $timeSql = microtime(true) - $startSql;
 
         return [
@@ -54,6 +54,16 @@ class RawSqlGridDataProvider implements GridDataProviderInterface
             'total' => $total,
             'timeSql' => round($timeSql, 4),
         ];
+    }
+
+    #[\Override]
+    public function getTotalCount(array $fields, array $filters): int
+    {
+        $fieldNames = array_keys($fields);
+        $qb = $this->connection->createQueryBuilder();
+        $qb->select('1')->from($this->tableName, 't');
+        $this->applyFilters($qb, $filters, $fieldNames);
+        return $this->getCount($qb);
     }
 
     /**
@@ -81,6 +91,19 @@ class RawSqlGridDataProvider implements GridDataProviderInterface
         }
         $countQb->setParameters($qb->getParameters(), $qb->getParameterTypes());
 
-        return (int) $countQb->executeQuery()->fetchOne();
+        return (int) $this->fetchCount($countQb);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function fetchAllAssociative(DbalQueryBuilder $qb): array
+    {
+        return $qb->execute()->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    private function fetchCount(DbalQueryBuilder $qb): string|int|false
+    {
+        return $qb->execute()->fetchColumn();
     }
 }

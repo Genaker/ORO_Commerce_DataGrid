@@ -1,0 +1,15 @@
+{#
+  Reusable pagination container for server-side grids.
+  When total, page, pageSize are provided, renders pagination from Twig.
+  Otherwise renders empty div for JS to fill (AJAX grids).
+
+  Variables:
+    - paginationId: container id (default: 'grid-pagination')
+    - total, page, pageSize: for server-side render
+    - showCustomPagination: bool (default true)
+#}
+<div id="{{ paginationId|default('grid-pagination') }}" class="grid-pagination-container">
+{% if showCustomPagination|default(true) and total is defined and page is defined and pageSize is defined %}
+    {% include '@GenakerDataGrid/_grid_pagination_body.html.twig' %}
+{% endif %}
+</div>

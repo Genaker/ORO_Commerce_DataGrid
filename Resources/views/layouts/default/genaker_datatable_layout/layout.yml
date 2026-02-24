@@ -12,3 +12,13 @@ layout:
                     gridType: 'DataTable'
                     gridBlock: '=data["genaker_data_grid"].getDataTableBlock()'
                     view: '=context["view"]'
+
+        - '@add':
+            id: grid_pagination
+            parentId: page_content
+            blockType: block
+            options:
+                vars:
+                    gridType: 'DataTable'
+                    gridBlock: '=data["genaker_data_grid"].getDataTableBlock()'
+                    view: '=context["view"]'

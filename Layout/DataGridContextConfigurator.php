@@ -24,6 +24,23 @@ class DataGridContextConfigurator implements ContextConfiguratorInterface
             return;
         }
 
-        $context->set('view', $request->query->get('view', 'index'));
+        $view = $request->query->get('view');
+        if ($view === null) {
+            $route = $request->attributes->get('_route', '');
+            if (str_contains($route, '_ajax_pagination')) {
+                $view = 'ajax_pagination';
+            } elseif (str_contains($route, '_html_all')) {
+                $view = 'html_all';
+            } elseif (str_contains($route, '_html')) {
+                $view = 'html';
+            } elseif (str_contains($route, '_ajax')) {
+                $view = 'ajax';
+            } elseif (str_contains($route, '_json')) {
+                $view = 'json';
+            } else {
+                $view = 'index';
+            }
+        }
+        $context->set('view', $view);
     }
 }

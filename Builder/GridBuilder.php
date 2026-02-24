@@ -22,6 +22,9 @@ class GridBuilder
     /** @var array{0: string, 1: string}|null */
     private ?array $defaultSort = null;
 
+    /** @var list<array{0: string, 1: string}> */
+    private array $joins = [];
+
     public function __construct(
         private readonly ManagerRegistry $doctrine,
     ) {
@@ -60,6 +63,16 @@ class GridBuilder
         return $this;
     }
 
+    /**
+     * @param string $join e.g. 'e.images'
+     * @param string $alias e.g. 'pi'
+     */
+    public function addJoin(string $join, string $alias): self
+    {
+        $this->joins[] = [$join, $alias];
+        return $this;
+    }
+
     public function build(): GridConfig
     {
         if ($this->entityClass === null || $this->fields === []) {
@@ -70,6 +83,7 @@ class GridBuilder
             $this->fields,
             $this->processors,
             $this->defaultSort,
+            $this->joins,
         );
     }
 }

@@ -3,6 +3,7 @@
 namespace Genaker\Bundle\DataGridBundle\Controller;
 
 use Genaker\Bundle\DataGridBundle\Block\GenericGridBlock;
+use Genaker\Bundle\DataGridBundle\Util\GridPaginationHtmlRenderer;
 use Oro\Bundle\LayoutBundle\Attribute\Layout;
 use Oro\Bundle\SecurityBundle\Attribute\AclAncestor;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,7 +29,13 @@ class GridJsController extends AbstractController
     #[Route(path: '/data', name: 'data', methods: ['GET'])]
     public function data(): JsonResponse
     {
-        return new JsonResponse($this->block->getGridJsonData());
+        $data = $this->block->getGridJsonData();
+        $data['paginationHtml'] = GridPaginationHtmlRenderer::render(
+            $data['total'],
+            $data['page'],
+            $data['pageSize']
+        );
+        return new JsonResponse($data);
     }
 
     #[Route(path: '/json', name: 'json', methods: ['GET'])]
@@ -45,6 +52,14 @@ class GridJsController extends AbstractController
     public function html(): array
     {
         return ['view' => 'html'];
+    }
+
+    #[Route(path: '/html-all', name: 'html_all', methods: ['GET'])]
+    #[Layout(action: 'genaker_gridjs_layout', vars: ['view'])]
+    #[AclAncestor('oro_product_view')]
+    public function htmlAll(): array
+    {
+        return ['view' => 'html_all'];
     }
 
     #[Route(path: '/ajax', name: 'ajax', methods: ['GET'])]

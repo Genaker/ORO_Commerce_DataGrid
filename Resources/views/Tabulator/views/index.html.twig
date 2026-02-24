@@ -2,9 +2,11 @@
 {% set dataUrl = gridBlock.getDataUrl() %}
 {% set fields = gridBlock.getFields() %}
 {% set fieldNames = gridBlock.getFieldsNames() %}
+{% set initialPageSize = app.request.query.get('pageSize', 10)|default(10) %}
+{% if initialPageSize not in [10, 25, 50, 100] %}{% set initialPageSize = 10 %}{% endif %}
 <div class="container-fluid">
     <h1>Product Grid (Tabulator)</h1>
-    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    {% include '@GenakerDataGrid/_filters.html.twig' with {gridBlock: gridBlock} %}
     <div id="product-grid"></div>
 </div>
 <link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/tabulator.min.css') }}">
@@ -18,7 +20,7 @@
         { 
             title: '{{ (fields[n] ?? n)|e('js') }}', 
             field: '{{ n|e('js') }}' 
-            {% if n == 'image' %}, formatter: "image", formatterParams: { height: "80px" }, headerSort: false {% endif %}
+            {% if n == 'image' %}, formatter: function(cell) { var url = cell.getValue(); return '<img src="' + (url || '{{ asset('bundles/genakerdatagrid/images/placeholder.svg')|e('js') }}') + '" style="max-width: 100px; max-height: 80px;" alt="' + (url ? 'Product' : 'No image') + '" />'; }, headerSort: false {% endif %}
         }{% if not loop.last %}, {% endif %}
     {% endfor %}];
     var data = {{ gridData.data|json_encode|raw }};
@@ -26,7 +28,8 @@
         data: data, 
         columns: columns, 
         pagination: true, 
-        paginationSize: 20,
+        paginationSize: {{ initialPageSize }},
+        paginationSizeSelector: [10, 25, 50, 100],
         layout: "fitColumns"
     });
 })();

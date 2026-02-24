@@ -3,7 +3,7 @@
 {% set fieldNames = gridBlock.getFieldsNames() %}
 <div class="container-fluid">
     <h1>Product Grid - Initial JSON (DataTables)</h1>
-    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    {% include '@GenakerDataGrid/_filters.html.twig' with {gridBlock: gridBlock} %}
     <div id="product-grid-preloader" class="grid-preloader"><div class="grid-spinner"></div></div>
     <table id="product-grid" class="display" style="display: none;">
         <thead><tr>{% for n in fieldNames %}<th>{{ fields[n] ?? n }}</th>{% endfor %}</tr></thead>
@@ -23,14 +23,14 @@ $(function() {
             title: '{{ (fields[n] ?? n)|e('js') }}', 
             data: '{{ n|e('js') }}',
             {% if n == 'image' %}
-            render: function(data) { return data ? `<img src="${data}" style="max-width: 100px; max-height: 80px;" />` : ''; }
+            render: function(data) { var src = data || '{{ asset('bundles/genakerdatagrid/images/placeholder.svg')|e('js') }}'; return `<img src="${src}" style="max-width: 100px; max-height: 80px;" alt="${data ? 'Product' : 'No image'}" />`; }
             {% endif %}
         }{% if not loop.last %}, {% endif %}
     {% endfor %}];
     $('#product-grid').DataTable({ 
         data: data, 
         columns: columns, 
-        pageLength: 20,
+        pageLength: 10,
         initComplete: function() {
             $('#product-grid-preloader').hide();
             $('#product-grid').show();

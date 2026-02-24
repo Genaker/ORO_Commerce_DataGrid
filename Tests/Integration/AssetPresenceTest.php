@@ -23,16 +23,20 @@ class AssetPresenceTest extends DataGridIntegrationTestCase
     public function assetPathProvider(): array
     {
         return [
+            ['js/grid-url-sync.js'],
+            ['js/grid-pagination.js'],
             ['js/gridjs.min.js'],
             ['js/datatables.min.js'],
             ['js/tabulator.min.js'],
             ['js/ag-grid.min.js'],
             ['js/jquery.min.js'],
+            ['css/grid-pagination.css'],
             ['css/gridjs-mermaid.min.css'],
             ['css/datatables.min.css'],
             ['css/tabulator.min.css'],
             ['css/ag-grid.min.css'],
             ['css/ag-theme-alpine.min.css'],
+            ['images/placeholder.svg'],
         ];
     }
 }

@@ -16,4 +16,5 @@ Documentation for the Product Grid Bundle extension for OroCommerce.
 
 - **Demo routes**: `/grid/gridjs`, `/grid/datatable`, `/grid/tabulator`, `/grid/ag-grid`
 - **Data endpoints**: `/grid/{type}/data` (JSON)
-- **Variants**: `/json`, `/html`, `/ajax`, `/ajax-pagination` per grid type
+- **Variants**: `/json`, `/html`, `/ajax`, `/ajax-pagination`, `/html-all` (infinity mode) per grid type
+- **Infinity mode demo**: `/grid/gridjs/html-all` — loads up to 1000 records, client-side sort/search/pagination

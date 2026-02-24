@@ -5,8 +5,8 @@ namespace Genaker\Bundle\DataGridBundle\Model\DataProcessor;
 use Oro\Bundle\AttachmentBundle\Manager\AttachmentManager;
 use Oro\Bundle\ProductBundle\Entity\Product;
 use Oro\Bundle\ProductBundle\Entity\ProductImage;
-use Oro\Bundle\ProductBundle\Entity\ProductImageType;
 use Oro\Bundle\ProductBundle\Helper\ProductImageHelper;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Processes product image to return its thumbnail URL.
@@ -43,7 +43,9 @@ class ImageProcessor implements DataProcessorInterface
         return $this->attachmentManager->getResizedImageUrl(
             $mainImage->getImage(),
             AttachmentManager::THUMBNAIL_WIDTH,
-            AttachmentManager::THUMBNAIL_HEIGHT
+            AttachmentManager::THUMBNAIL_HEIGHT,
+            '',
+            UrlGeneratorInterface::ABSOLUTE_URL
         );
     }
 }

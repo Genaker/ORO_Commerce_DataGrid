@@ -12,3 +12,13 @@ layout:
                     gridType: 'Tabulator'
                     gridBlock: '=data["genaker_data_grid"].getTabulatorBlock()'
                     view: '=context["view"]'
+
+        - '@add':
+            id: grid_pagination
+            parentId: page_content
+            blockType: block
+            options:
+                vars:
+                    gridType: 'Tabulator'
+                    gridBlock: '=data["genaker_data_grid"].getTabulatorBlock()'
+                    view: '=context["view"]'

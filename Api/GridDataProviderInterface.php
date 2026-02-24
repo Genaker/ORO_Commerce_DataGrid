@@ -21,4 +21,12 @@ interface GridDataProviderInterface
         ?string $sortField,
         ?string $sortOrder
     ): array;
+
+    /**
+     * Get total record count for current filters (no pagination).
+     *
+     * @param array<string, string> $fields Field name => label
+     * @param array<string, mixed>  $filters
+     */
+    public function getTotalCount(array $fields, array $filters): int;
 }

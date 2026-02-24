@@ -48,12 +48,14 @@ Built with **OroPlatform 6.1 best practices**, this bundle ensures your admin in
 - **🏗️ Reusable Architecture** — Generic builders and providers that work with any Doctrine entity.
 - **⌛ Smooth UX** — Integrated CSS preloaders and progressive enhancement for HTML-sourced grids.
 - **📦 Self-Contained Assets** — All JS/CSS libraries are bundled locally for maximum reliability and speed.
+- **∞ Infinity Mode (html-all)** — Load up to 1000 records at once for client-side sort, search, and pagination. See `/grid/gridjs/html-all`.
 
 ---
 
 ## Table of Contents
 
 - [Live Demo Routes](#live-demo-routes)
+- [HTML-All / Infinity Mode](#html-all--infinity-mode)
 - [Architecture & Reusable Classes](#architecture--reusable-classes)
 - [How to Add a New Grid](#adding-a-new-grid)
 - [Asset Management](#asset-management)
@@ -68,11 +70,28 @@ Each library is exposed through a set of demo routes. These routes are set to `P
 
 | Library | Base URL | Data Endpoint (JSON) | Variants | JS Size (Minified) | JS Size (Gzipped) | vs. Oro DataGrid |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Grid.js** | `/grid/gridjs` | `/grid/gridjs/data` | `/json`, `/html`, `/ajax`, `/ajax-pagination` | **~52 KB** | **~17 KB** | **-93% lighter** |
-| **DataTables** | `/grid/datatable` | `/grid/datatable/data` | `/json`, `/html`, `/ajax`, `/ajax-pagination` | **~86 KB** | **~30 KB** | **-88% lighter** |
-| **Tabulator** | `/grid/tabulator` | `/grid/tabulator/data` | `/json`, `/html`, `/ajax`, `/ajax-pagination` | **~383 KB** | **~87 KB** | **-65% lighter** |
+| **Grid.js** | `/grid/gridjs` | `/grid/gridjs/data` | `/json`, `/html`, `/ajax`, `/ajax-pagination`, **`/html-all`** | **~52 KB** | **~17 KB** | **-93% lighter** |
+| **DataTables** | `/grid/datatable` | `/grid/datatable/data` | `/json`, `/html`, `/ajax`, `/ajax-pagination`, `/html-all` | **~86 KB** | **~30 KB** | **-88% lighter** |
+| **Tabulator** | `/grid/tabulator` | `/grid/tabulator/data` | `/json`, `/html`, `/ajax`, `/ajax-pagination`, `/html-all` | **~383 KB** | **~87 KB** | **-65% lighter** |
 | **Oro DataGrid** | *Standard* | *Standard* | *Standard* | **~1.2 MB** | **~250 KB** | *Baseline* |
-| **AG Grid** (v33) | `/grid/ag-grid` | `/grid/ag-grid/data` | `/json`, `/html`, `/ajax`, `/ajax-pagination` | **~1.7 MB** | **~380 KB** | **+52% heavier** |
+| **AG Grid** (v33) | `/grid/ag-grid` | `/grid/ag-grid/data` | `/json`, `/html`, `/ajax`, `/ajax-pagination`, `/html-all` | **~1.7 MB** | **~380 KB** | **+52% heavier** |
+
+---
+
+## HTML-All / Infinity Mode
+
+The **html-all** view loads a larger dataset (up to 1000 records by default) in a single request and renders it with **client-side** sort, search, and pagination. No server round-trips when changing pages or sorting—ideal for smaller datasets or admin tools.
+
+**Live demo:** `/grid/gridjs/html-all`
+
+| Library | html-all route |
+| :--- | :--- |
+| Grid.js | `/grid/gridjs/html-all` |
+| DataTables | `/grid/datatable/html-all` |
+| Tabulator | `/grid/tabulator/html-all` |
+| AG Grid | `/grid/ag-grid/html-all` |
+
+The limit is configurable via `GenericGridBlock::getGridJsonDataWithLimit(int $limit)`.
 
 ---
 

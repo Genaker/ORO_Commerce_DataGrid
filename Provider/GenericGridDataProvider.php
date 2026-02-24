@@ -61,6 +61,15 @@ class GenericGridDataProvider implements GridDataProviderInterface
         ];
     }
 
+    #[\Override]
+    public function getTotalCount(array $fields, array $filters): int
+    {
+        $fieldNames = array_keys($fields);
+        $qb = $this->createQueryBuilder($fieldNames);
+        $this->applyFilters($qb, $filters, $fieldNames);
+        return $this->getCount($qb);
+    }
+
     /**
      * @param list<string> $fieldNames
      */
@@ -71,6 +80,10 @@ class GenericGridDataProvider implements GridDataProviderInterface
             ->createQueryBuilder(self::ALIAS);
 
         $qb->select(self::ALIAS);
+
+        foreach ($this->config->getJoins() as [$join, $alias]) {
+            $qb->leftJoin($join, $alias)->addSelect($alias);
+        }
 
         return $qb;
     }
@@ -98,10 +111,11 @@ class GenericGridDataProvider implements GridDataProviderInterface
     private function getCount(QueryBuilder $qb): int
     {
         $countQb = clone $qb;
-        $countQb->select('COUNT(' . self::ALIAS . ')');
+        $countQb->select('COUNT(DISTINCT ' . self::ALIAS . ')');
         $countQb->setFirstResult(null);
         $countQb->setMaxResults(null);
         $countQb->resetDQLPart('orderBy');
+        $countQb->resetDQLPart('groupBy');
 
         return (int) $countQb->getQuery()->getSingleScalarResult();
     }

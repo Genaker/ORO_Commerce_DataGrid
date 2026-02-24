@@ -3,7 +3,7 @@
 {% set fieldNames = gridBlock.getFieldsNames() %}
 <div class="container-fluid">
     <h1>Product Grid - Initial JSON (AG Grid)</h1>
-    {% include '@GenakerDataGrid/GridJs/_filters.html.twig' with {gridBlock: gridBlock} %}
+    {% include '@GenakerDataGrid/_filters.html.twig' with {gridBlock: gridBlock} %}
     <div id="product-grid" class="ag-theme-alpine ag-grid" style="height: 400px;"></div>
 </div>
 <link rel="stylesheet" href="{{ asset('bundles/genakerdatagrid/css/ag-grid.min.css') }}">
@@ -15,15 +15,17 @@
         { 
             field: '{{ n|e('js') }}', 
             headerName: '{{ (fields[n] ?? n)|e('js') }}'
-            {% if n == 'image' %}, cellRenderer: (params) => params.value ? `<img src="${params.value}" style="max-width: 100px; max-height: 80px;" />` : '' {% endif %}
+            {% if n == 'image' %}, cellRenderer: (params) => { var img = document.createElement('img'); img.src = params.value || '{{ asset('bundles/genakerdatagrid/images/placeholder.svg')|e('js') }}'; img.style.maxWidth = '100px'; img.style.maxHeight = '80px'; img.alt = params.value ? 'Product' : 'No image'; return img; } {% endif %}
         }{% if not loop.last %}, {% endif %}
     {% endfor %}];
     var rowData = {{ gridData.data|json_encode|raw }};
     agGrid.createGrid(document.getElementById('product-grid'), {
+        theme: 'legacy',
         columnDefs: columnDefs,
         rowData: rowData,
+        rowHeight: 90,
         pagination: true,
-        paginationPageSize: 20
+        paginationPageSize: 10
     });
 })();
 </script>

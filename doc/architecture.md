@@ -32,5 +32,9 @@ The bundle uses a layered architecture:
 
 - layouts/default/genaker_product_grid/layout.yml
 - layouts/default/genaker_product_grid/layout.html.twig
-- GridJs, DataTable, Tabulator, AgGrid each have a views/ folder with templates: index, json, html, ajax, ajax_pagination
-- GridJs/_filters.html.twig is shared
+- GridJs, DataTable, Tabulator, AgGrid each have a views/ folder with templates: index, json, html, html_all, ajax, ajax_pagination
+- _filters.html.twig, _page_size_selector.html.twig are shared (in views/)
+
+## HTML-All (Infinity Mode)
+
+The **html-all** view uses `getGridJsonDataWithLimit(1000)` to load up to 1000 records in one request. All sort, search, and pagination run client-side—no server round-trips. Available at `/grid/gridjs/html-all`, `/grid/datatable/html-all`, etc.

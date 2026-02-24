@@ -14,12 +14,14 @@ final class GridConfig
      * @param array<string, string> $fields Field name => label
      * @param array<string, DataProcessorInterface> $processors Field name => processor
      * @param array{0: string, 1: string}|null $defaultSort [field, asc|desc]
+     * @param list<array{0: string, 1: string}> $joins [[join, alias], ...] for eager loading
      */
     public function __construct(
         private readonly string $entityClass,
         private readonly array $fields,
         private readonly array $processors = [],
         private readonly ?array $defaultSort = null,
+        private readonly array $joins = [],
     ) {
     }
 
@@ -50,6 +52,14 @@ final class GridConfig
     public function getDefaultSort(): ?array
     {
         return $this->defaultSort;
+    }
+
+    /**
+     * @return list<array{0: string, 1: string}>
+     */
+    public function getJoins(): array
+    {
+        return $this->joins;
     }
 
     /**
