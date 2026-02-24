@@ -128,10 +128,6 @@ $config = (new GridBuilder($doctrine))
 $dataProvider = new GenericGridDataProvider($doctrine, $config);
 ```
 
-For a detailed walkthrough, see the [How to Add a Block and Test It](./docs/HOW_TO_ADD_BLOCK_AND_TEST.md) guide.
-
----
-
 ## Asset Management
 
 Assets are managed via Symfony's asset system. To ensure relative symlinks work correctly across Docker/Warden environments, always install using:
@@ -164,16 +160,3 @@ TEST_BASE_URL=https://app.example.test php bin/phpunit -c src/Genaker/Bundle/Dat
 - **DataGridLayoutDataProviderTest** — Validates the logic for route-to-grid mapping.
 
 ---
-
-## Developer Guide
-
-For more in-depth information on extending this bundle, refer to the following documentation:
-
-- [How to Add and Test Custom Layout Blocks](./docs/HOW_TO_ADD_BLOCK_AND_TEST.md)
-- [OroPlatform 6.1 Architecture Principles](https://doc.oroinc.com/backend/architecture/framework/architecture-principles/)
-
----
-
-## Related Keywords
-
-*OroCommerce* • *Product Grid* • *Data Grid* • *B2B eCommerce* • *Grid.js* • *DataTables* • *Tabulator* • *AG Grid* • *Symfony 6.4* • *Doctrine ORM* • *Admin Dashboard*

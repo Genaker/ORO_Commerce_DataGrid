@@ -57,13 +57,7 @@
         }{% if not loop.last %}, {% endif %}
     {% endfor %}];
 
-    function getEmbeddedData() {
-        var el = document.getElementById('grid-initial-data');
-        if (!el) return null;
-        try { return JSON.parse(el.textContent); } catch (e) { return null; }
-    }
-
-    var embeddedData = getEmbeddedData();
+    var embeddedData = GridUrlSync.readEmbedded('grid-initial-data');
     var useEmbedded = embeddedData && embeddedData.data && embeddedData.data.length > 0;
     var initialRenderDone = false;
 

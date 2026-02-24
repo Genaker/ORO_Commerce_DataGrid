@@ -23,6 +23,17 @@
     }
 
     /**
+     * Read JSON from a script/JSON element by id.
+     * @param {string} id - Element id (e.g. 'grid-initial-data')
+     * @returns {Object|null} Parsed JSON or null
+     */
+    function readEmbedded(id) {
+        var el = document.getElementById(id);
+        if (!el) return null;
+        try { return JSON.parse(el.textContent); } catch (e) { return null; }
+    }
+
+    /**
      * Build fetch URL by merging baseUrl params with grid params.
      * @param {string} baseUrl - Data endpoint URL (may include filter params)
      * @param {Object} opts - { p, pageSize, sortField, sortOrder }
@@ -41,6 +52,7 @@
     global.GridUrlSync = {
         syncUrl: syncUrl,
         buildFetchUrl: buildFetchUrl,
-        getParams: getParams
+        getParams: getParams,
+        readEmbedded: readEmbedded
     };
 })(typeof window !== 'undefined' ? window : this);
